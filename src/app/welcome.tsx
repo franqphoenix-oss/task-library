@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "../constants/colors";
@@ -8,39 +8,43 @@ import { typography } from "../constants/typography";
 
 export default function WelcomeScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <View style={styles.container}>
-        <View style={styles.hero}>
-          <View style={styles.icon}>
-            <Text style={styles.iconText}>✓</Text>
-          </View>
+        {/* Temporary visual asset */}
+        <View style={styles.visualPlaceholder}>
+          <Text style={styles.placeholderText}>TL</Text>
+        </View>
 
-          <Text style={styles.title}>
-            Get more done,{`\n`}without the chaos.
-          </Text>
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={styles.title}>Plan better.</Text>
 
-          <Text style={styles.description}>
-            Task Library turns your goals into clear, actionable plans so you
-            always know what to work on next.
+          <Text style={styles.subtitle}>
+            Turn your goals into clear, actionable tasks and stay on track.
           </Text>
         </View>
 
+        {/* Actions */}
         <View style={styles.actions}>
-          <View
-            style={styles.primaryButton}
-            onTouchEnd={() => router.push("/signup")}
+          <Pressable
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => router.push("/signup")}
           >
             <Text style={styles.primaryButtonText}>Create an account</Text>
-          </View>
+          </Pressable>
 
-          <View
-            style={styles.secondaryButton}
-            onTouchEnd={() => router.push("/login")}
+          <Pressable
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => router.push("/login")}
           >
             <Text style={styles.secondaryButtonText}>Log in</Text>
-          </View>
-
-          <Text style={styles.footer}>Plan smarter. Work with purpose.</Text>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
@@ -55,63 +59,59 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xxxl,
-    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.xl,
   },
 
-  hero: {
-    alignItems: "center",
-    justifyContent: "center",
+  visualPlaceholder: {
     flex: 1,
-  },
-
-  icon: {
-    width: 68,
-    height: 68,
-    borderRadius: radius.xl,
+    minHeight: 240,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.xxl,
   },
 
-  iconText: {
-    color: colors.accent,
-    fontSize: 30,
+  placeholderText: {
+    color: colors.textMuted,
+    fontSize: 32,
     fontWeight: typography.weights.bold,
+  },
+
+  content: {
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
   },
 
   title: {
     color: colors.text,
-    fontSize: 30,
-    lineHeight: 38,
-    fontWeight: typography.weights.semibold,
+    fontSize: typography.sizes.display,
+    fontWeight: typography.weights.bold,
+    letterSpacing: -1,
     textAlign: "center",
-    marginBottom: spacing.lg,
   },
 
-  description: {
-    maxWidth: 340,
+  subtitle: {
+    marginTop: spacing.md,
+    maxWidth: 320,
     color: colors.textSecondary,
     fontSize: typography.sizes.md,
+    fontWeight: typography.weights.regular,
     lineHeight: 24,
     textAlign: "center",
   },
 
   actions: {
+    width: "100%",
+    marginTop: spacing.xxxl,
     gap: spacing.md,
   },
 
   primaryButton: {
+    width: "100%",
     minHeight: 54,
     borderRadius: radius.lg,
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.accent,
   },
 
   primaryButtonText: {
@@ -121,13 +121,14 @@ const styles = StyleSheet.create({
   },
 
   secondaryButton: {
+    width: "100%",
     minHeight: 54,
     borderRadius: radius.lg,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   secondaryButtonText: {
@@ -136,10 +137,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.semibold,
   },
 
-  footer: {
-    color: colors.textMuted,
-    fontSize: typography.sizes.xs,
-    textAlign: "center",
-    marginTop: spacing.sm,
+  buttonPressed: {
+    opacity: 0.75,
   },
 });

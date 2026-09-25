@@ -1,30 +1,82 @@
 import { router } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "../constants/colors";
+import { radius, spacing } from "../constants/spacing";
 import { typography } from "../constants/typography";
 
-export default function SplashScreen() {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace("/welcome");
-    }, 1800);
+const loadingMessages = [
+  "Preparing your workspace...",
+  "Organizing your tasks...",
+  "Building your schedule...",
+  "Almost ready...",
+];
 
-    return () => clearTimeout(timer);
-  }, []);
+export default function SplashScreen() {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  const contentOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Initial fade-in
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+
+    // Change the loading message
+    const messageInterval = setInterval(() => {
+      setMessageIndex((current) => {
+        if (current < loadingMessages.length - 1) {
+          return current + 1;
+        }
+
+        return current;
+      });
+    }, 1000);
+
+    // Temporary mocked startup delay
+    const splashTimeout = setTimeout(() => {
+      router.replace("/welcome");
+    }, 4000);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearTimeout(splashTimeout);
+    };
+  }, [contentOpacity]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>T</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      <Animated.View style={[styles.container, { opacity: contentOpacity }]}>
+        {/* Temporary asset placeholder */}
+        <View style={styles.logoPlaceholder}>
+          <Text style={styles.logoPlaceholderText}>TL</Text>
         </View>
 
         <Text style={styles.title}>Task Library</Text>
-        <Text style={styles.subtitle}>Plan better. Get things done.</Text>
-      </View>
+
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingMessage}>
+            {loadingMessages[messageIndex]}
+          </Text>
+
+          <ActivityIndicator
+            size="small"
+            color={colors.accent}
+            style={styles.spinner}
+          />
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -39,21 +91,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: spacing.xxl,
   },
 
-  logo: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
+  logoPlaceholder: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.accent,
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
 
-  logoText: {
-    color: colors.white,
-    fontSize: 34,
+  logoPlaceholderText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xl,
     fontWeight: typography.weights.bold,
   },
 
@@ -61,11 +116,23 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: typography.sizes.xxl,
     fontWeight: typography.weights.semibold,
+    letterSpacing: -0.5,
   },
 
-  subtitle: {
+  loadingContainer: {
+    position: "absolute",
+    bottom: spacing.xxxl,
+    alignItems: "center",
+  },
+
+  loadingMessage: {
     color: colors.textSecondary,
     fontSize: typography.sizes.sm,
-    marginTop: 6,
+    fontWeight: typography.weights.medium,
+    textAlign: "center",
+  },
+
+  spinner: {
+    marginTop: spacing.md,
   },
 });
