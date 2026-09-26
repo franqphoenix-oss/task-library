@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "../constants/colors";
@@ -8,56 +8,95 @@ import { typography } from "../constants/typography";
 
 export default function SignupScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <View style={styles.container}>
-        <Text style={styles.back} onPress={() => router.back()}>
-          ← Back
-        </Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backIcon}>‹</Text>
+        </Pressable>
 
         <View style={styles.content}>
           <Text style={styles.title}>Create your account</Text>
 
           <Text style={styles.subtitle}>
-            Start turning your goals into actionable plans.
+            Get started with Task Library today.
           </Text>
 
           <View style={styles.form}>
             <View>
-              <Text style={styles.label}>Name</Text>
+              <Text style={styles.label}>Full name</Text>
+
               <TextInput
-                placeholder="Your name"
+                placeholder="John Doe"
                 placeholderTextColor={colors.textMuted}
                 style={styles.input}
               />
             </View>
 
             <View>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email address</Text>
+
               <TextInput
                 placeholder="you@example.com"
                 placeholderTextColor={colors.textMuted}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
                 style={styles.input}
               />
             </View>
 
             <View>
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                placeholder="Create a password"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry
-                style={styles.input}
-              />
+
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  placeholder="••••••••••"
+                  placeholderTextColor={colors.textMuted}
+                  secureTextEntry
+                  style={styles.passwordInput}
+                />
+
+                <Text style={styles.eyeIcon}>◉</Text>
+              </View>
             </View>
           </View>
 
-          <View
-            style={styles.button}
-            onTouchEnd={() => router.replace("/login")}
+          <Pressable
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => router.replace("/login")}
           >
-            <Text style={styles.buttonText}>Create account</Text>
+            <Text style={styles.primaryButtonText}>Sign Up</Text>
+          </Pressable>
+
+          <Text style={styles.continueText}>or continue with</Text>
+
+          <View style={styles.socialRow}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.socialButton,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.googleIcon}>G</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.socialButton,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.appleIcon}>●</Text>
+            </Pressable>
           </View>
 
           <Text style={styles.switchText}>
@@ -83,77 +122,153 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
 
-  back: {
-    color: colors.textSecondary,
-    fontSize: typography.sizes.md,
+  backButton: {
+    width: 32,
+    height: 32,
+    alignItems: "flex-start",
+    justifyContent: "center",
     marginTop: spacing.lg,
+  },
+
+  backIcon: {
+    color: colors.text,
+    fontSize: 30,
+    fontWeight: typography.weights.regular,
+    lineHeight: 30,
   },
 
   content: {
     flex: 1,
-    justifyContent: "center",
+    paddingTop: spacing.xl,
   },
 
   title: {
     color: colors.text,
-    fontSize: typography.sizes.xxl,
+    fontSize: typography.sizes.xl,
     fontWeight: typography.weights.semibold,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
 
   subtitle: {
     color: colors.textSecondary,
-    fontSize: typography.sizes.md,
-    lineHeight: 23,
-    marginBottom: spacing.xxxl,
+    fontSize: typography.sizes.xs,
+    lineHeight: 18,
+    marginBottom: spacing.xl,
   },
 
   form: {
-    gap: spacing.lg,
+    gap: spacing.md,
   },
 
   label: {
     color: colors.text,
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
     fontWeight: typography.weights.medium,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
 
   input: {
-    height: 52,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.lg,
+    height: 42,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     color: colors.text,
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.xs,
   },
 
-  button: {
-    height: 54,
-    borderRadius: radius.lg,
+  passwordWrapper: {
+    position: "relative",
+  },
+
+  passwordInput: {
+    height: 42,
+    paddingHorizontal: spacing.md,
+    paddingRight: 42,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    color: colors.text,
+    fontSize: typography.sizes.xs,
+  },
+
+  eyeIcon: {
+    position: "absolute",
+    right: spacing.md,
+    top: 11,
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+
+  primaryButton: {
+    height: 42,
+    borderRadius: radius.sm,
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.accent,
-    marginTop: spacing.xxxl,
+    marginTop: spacing.lg,
   },
 
-  buttonText: {
+  primaryButtonText: {
     color: colors.white,
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.xs,
     fontWeight: typography.weights.semibold,
+  },
+
+  continueText: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    textAlign: "center",
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+
+  socialRow: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
+
+  socialButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  googleIcon: {
+    color: "#4285F4",
+    fontSize: 17,
+    fontWeight: typography.weights.bold,
+  },
+
+  appleIcon: {
+    color: colors.text,
+    fontSize: 15,
   },
 
   switchText: {
     color: colors.textSecondary,
     textAlign: "center",
     marginTop: spacing.lg,
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
   },
 
   link: {
     color: colors.accent,
-    fontWeight: typography.weights.semibold,
+    fontWeight: typography.weights.medium,
+  },
+
+  pressed: {
+    opacity: 0.65,
+  },
+
+  buttonPressed: {
+    opacity: 0.8,
   },
 });
