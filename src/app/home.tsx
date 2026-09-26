@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: 120,
+    paddingBottom: 105,
   },
 
   header: {
