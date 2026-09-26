@@ -1,59 +1,18 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import { colors } from "../../constants/colors";
-import { spacing } from "../../constants/spacing";
-import { typography } from "../../constants/typography";
+import { dashboardHeaderStyles } from "./dashboard-header.styles";
 
 export function DashboardHeader() {
   return (
-    <View style={styles.container}>
+    <View style={dashboardHeaderStyles.container}>
       <View>
-        <Text style={styles.greeting}>Good morning</Text>
-        <Text style={styles.title}>Let’s get things done.</Text>
+        <Text style={dashboardHeaderStyles.greeting}>Good morning</Text>
+        <Text style={dashboardHeaderStyles.title}>Let’s get things done.</Text>
       </View>
 
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>FP</Text>
+      <View style={dashboardHeaderStyles.avatar}>
+        <Text style={dashboardHeaderStyles.avatarText}>FP</Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.xxl,
-  },
-
-  greeting: {
-    color: colors.textSecondary,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.medium,
-    marginBottom: spacing.xs,
-  },
-
-  title: {
-    color: colors.text,
-    fontSize: typography.sizes.xxl,
-    fontWeight: typography.weights.semibold,
-  },
-
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-
-  avatarText: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-  },
-});
