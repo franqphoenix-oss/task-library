@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
 
+import { homeStyles } from "@/features/home/home.styles";
 import { colors } from "../constants/colors";
 import { radius, spacing } from "../constants/spacing";
 import { typography } from "../constants/typography";
@@ -216,24 +217,24 @@ export default function HomeScreen() {
     tasks.find((task) => task.status === "upcoming");
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.screen}>
+    <SafeAreaView style={homeStyles.safeArea} edges={["top"]}>
+      <View style={homeStyles.screen}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={homeStyles.content}
         >
           {/* Header */}
-          <View style={styles.header}>
+          <View style={homeStyles.header}>
             <View>
-              <Text style={styles.greeting}>Good morning, Alex 👋</Text>
-              <Text style={styles.dateText}>Thu, 24 Apr 2025</Text>
+              <Text style={homeStyles.greeting}>Good morning, Alex 👋</Text>
+              <Text style={homeStyles.dateText}>Thu, 24 Apr 2025</Text>
             </View>
 
             <Pressable
-              style={styles.profileButton}
+              style={homeStyles.profileButton}
               onPress={() => router.push("/settings")}
             >
-              <Text style={styles.profileIcon}>♙</Text>
+              <Text style={homeStyles.profileIcon}>♙</Text>
             </Pressable>
           </View>
 
@@ -241,23 +242,29 @@ export default function HomeScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dateRow}
+            contentContainerStyle={homeStyles.dateRow}
           >
             {dates.map((item) => (
               <View
                 key={item.date}
-                style={[styles.dateItem, item.active && styles.dateItemActive]}
+                style={[
+                  homeStyles.dateItem,
+                  item.active && homeStyles.dateItemActive,
+                ]}
               >
                 <Text
-                  style={[styles.dayText, item.active && styles.activeDateText]}
+                  style={[
+                    homeStyles.dayText,
+                    item.active && homeStyles.activeDateText,
+                  ]}
                 >
                   {item.day}
                 </Text>
 
                 <Text
                   style={[
-                    styles.numberText,
-                    item.active && styles.activeDateText,
+                    homeStyles.numberText,
+                    item.active && homeStyles.activeDateText,
                   ]}
                 >
                   {item.date}
@@ -267,78 +274,97 @@ export default function HomeScreen() {
           </ScrollView>
 
           {/* Next up */}
-          <View style={styles.nextUpCard}>
-            <View style={styles.nextUpHeader}>
-              <View style={styles.nextUpTitleRow}>
-                <View style={styles.nextUpDot} />
-                <Text style={styles.nextUpLabel}>Next up</Text>
+          <View style={homeStyles.nextUpCard}>
+            <View style={homeStyles.nextUpHeader}>
+              <View style={homeStyles.nextUpTitleRow}>
+                <View style={homeStyles.nextUpDot} />
+                <Text style={homeStyles.nextUpLabel}>Next up</Text>
               </View>
 
-              <Text style={styles.moreIcon}>⋮</Text>
+              <Text style={homeStyles.moreIcon}>⋮</Text>
             </View>
 
-            <Text style={styles.taskTitle}>
+            <Text style={homeStyles.taskTitle}>
               {nextTask?.title || "No tasks scheduled"}
             </Text>
 
-            <Text style={styles.taskTime}>{nextTask?.time || "N/A"}</Text>
+            <Text style={homeStyles.taskTime}>{nextTask?.time || "N/A"}</Text>
 
-            <View style={styles.taskBottomRow}>
-              <View style={styles.taskStatus}>
-                <Text style={styles.checkText}>✓</Text>
+            <View style={homeStyles.taskBottomRow}>
+              <View style={homeStyles.taskStatus}>
+                <Text style={homeStyles.checkText}>✓</Text>
               </View>
 
-              <View style={styles.taskProgressTrack}>
-                <View style={styles.taskProgressFill} />
+              <View style={homeStyles.taskProgressTrack}>
+                <View
+                  style={[
+                    homeStyles.taskProgressFill,
+                    {
+                      width: `${progressPercentage}%`,
+                    },
+                  ]}
+                />
               </View>
 
-              <Text style={styles.taskPercentage}>{progressPercentage}%</Text>
+              <Text style={homeStyles.taskPercentage}>
+                {progressPercentage}%
+              </Text>
             </View>
           </View>
 
           {/* Today's progress */}
-          <View style={styles.progressHeader}>
-            <Text style={styles.sectionTitle}>Today's progress</Text>
+          <View style={homeStyles.progressHeader}>
+            <Text style={homeStyles.sectionTitle}>Today's progress</Text>
 
-            <Text style={styles.progressSummary}>{totalTasks} tasks</Text>
+            <Text style={homeStyles.progressSummary}>{totalTasks} tasks</Text>
           </View>
 
-          <View style={styles.progressRow}>
-            <View style={styles.progressTrack}>
-              <View style={styles.progressFill} />
+          <View style={homeStyles.progressRow}>
+            <View style={homeStyles.progressTrack}>
+              <View
+                style={[
+                  homeStyles.progressFill,
+                  {
+                    width: `${progressPercentage}%`,
+                  },
+                ]}
+              />
             </View>
 
-            <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
+            <Text style={homeStyles.progressPercentage}>
+              {progressPercentage}%
+            </Text>
           </View>
 
           {/* Today's schedule */}
-          <View style={styles.scheduleSection}>
-            <Text style={styles.sectionTitle}>Today's schedule</Text>
+          <View style={homeStyles.scheduleSection}>
+            <Text style={homeStyles.sectionTitle}>Today's schedule</Text>
 
-            <View style={styles.scheduleCard}>
+            <View style={homeStyles.scheduleCard}>
               {schedule.map((item, index) => (
                 <View
                   key={item.title}
                   style={[
-                    styles.scheduleItem,
-                    index !== schedule.length - 1 && styles.scheduleItemSpacing,
+                    homeStyles.scheduleItem,
+                    index !== schedule.length - 1 &&
+                      homeStyles.scheduleItemSpacing,
                   ]}
                 >
-                  <Text style={styles.scheduleTime}>{item.time}</Text>
+                  <Text style={homeStyles.scheduleTime}>{item.time}</Text>
 
                   <View
                     style={[
-                      styles.scheduleIcon,
-                      item.type === "break" && styles.breakIcon,
+                      homeStyles.scheduleIcon,
+                      item.type === "break" && homeStyles.breakIcon,
                     ]}
                   >
-                    <Text style={styles.scheduleIconText}>{item.icon}</Text>
+                    <Text style={homeStyles.scheduleIconText}>{item.icon}</Text>
                   </View>
 
                   <Text
                     style={[
-                      styles.scheduleTitle,
-                      item.type === "break" && styles.breakTitle,
+                      homeStyles.scheduleTitle,
+                      item.type === "break" && homeStyles.breakTitle,
                     ]}
                   >
                     {item.title}
@@ -352,42 +378,44 @@ export default function HomeScreen() {
         {/* Floating create button */}
         <Pressable
           style={({ pressed }) => [
-            styles.createButton,
-            pressed && styles.buttonPressed,
+            homeStyles.createButton,
+            pressed && homeStyles.buttonPressed,
           ]}
           onPress={() => router.push("/create-task")}
         >
-          <Text style={styles.createPlus}>+</Text>
-          <Text style={styles.createText}>Create Task</Text>
+          <Text style={homeStyles.createPlus}>+</Text>
+          <Text style={homeStyles.createText}>Create Task</Text>
         </Pressable>
 
         {/* Bottom navigation */}
-        <View style={styles.bottomNav}>
-          <Pressable style={styles.navItem}>
+        <View style={homeStyles.bottomNav}>
+          <Pressable style={homeStyles.navItem}>
             <HomeIcon active />
 
-            <Text style={[styles.navLabel, styles.navActive]}>Home</Text>
+            <Text style={[homeStyles.navLabel, homeStyles.navActive]}>
+              Home
+            </Text>
           </Pressable>
 
-          <Pressable style={styles.navItem}>
+          <Pressable style={homeStyles.navItem}>
             <TasksIcon />
 
-            <Text style={styles.navLabel}>Tasks</Text>
+            <Text style={homeStyles.navLabel}>Tasks</Text>
           </Pressable>
 
-          <Pressable style={styles.navItem}>
+          <Pressable style={homeStyles.navItem}>
             <AnalyticsIcon />
 
-            <Text style={styles.navLabel}>Analytics</Text>
+            <Text style={homeStyles.navLabel}>Analytics</Text>
           </Pressable>
 
           <Pressable
-            style={styles.navItem}
+            style={homeStyles.navItem}
             onPress={() => router.push("/settings")}
           >
             <SettingsIcon />
 
-            <Text style={styles.navLabel}>Settings</Text>
+            <Text style={homeStyles.navLabel}>Settings</Text>
           </Pressable>
         </View>
       </View>
@@ -396,234 +424,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: 105,
-  },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.lg,
-  },
-
-  greeting: {
-    color: colors.text,
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.semibold,
-    marginBottom: 3,
-  },
-
-  dateText: {
-    color: colors.textSecondary,
-    fontSize: 10,
-  },
-
-  profileButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  profileIcon: {
-    color: colors.text,
-    fontSize: 14,
-  },
-
-  dateRow: {
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-
-  dateItem: {
-    width: 38,
-    height: 46,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  dateItemActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-
-  dayText: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginBottom: 3,
-  },
-
-  numberText: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-  },
-
-  activeDateText: {
-    color: colors.white,
-  },
-
-  nextUpCard: {
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.lg,
-  },
-
-  nextUpHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.sm,
-  },
-
-  nextUpTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  nextUpDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
-    marginRight: 6,
-  },
-
-  nextUpLabel: {
-    color: colors.textSecondary,
-    fontSize: 10,
-    fontWeight: typography.weights.medium,
-  },
-
-  moreIcon: {
-    color: colors.textSecondary,
-    fontSize: 18,
-  },
-
-  taskTitle: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-    marginBottom: 4,
-  },
-
-  taskTime: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginBottom: spacing.md,
-  },
-
-  taskBottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  taskStatus: {
-    width: 15,
-    height: 15,
-    borderRadius: 8,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
-
-  checkText: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
-  taskProgressTrack: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.surfaceElevated,
-    overflow: "hidden",
-  },
-
-  taskProgressFill: {
-    width: "0%",
-    height: "100%",
-    backgroundColor: colors.accent,
-  },
-
-  taskPercentage: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginLeft: spacing.sm,
-  },
-
-  progressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-
-  sectionTitle: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-  },
-
-  progressSummary: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
-  progressRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.lg,
-  },
-
-  progressTrack: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.surfaceElevated,
-    overflow: "hidden",
-    marginRight: spacing.sm,
-  },
-
-  progressFill: {
-    width: "50%",
-    height: "100%",
-    borderRadius: 3,
-    backgroundColor: colors.accent,
-  },
-
-  progressPercentage: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
   scheduleSection: {
     marginTop: spacing.xs,
   },
