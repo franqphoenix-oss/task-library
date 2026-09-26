@@ -2,6 +2,8 @@ import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useTasks } from "../context/TaskContext";
+
 import { colors } from "../constants/colors";
 import { radius, spacing } from "../constants/spacing";
 import { typography } from "../constants/typography";
@@ -198,6 +200,21 @@ function SettingsIcon({ active = false }: { active?: boolean }) {
 }
 
 export default function HomeScreen() {
+  const { tasks } = useTasks();
+
+  const completedTasks = tasks.filter(
+    (task) => task.status === "completed",
+  ).length;
+
+  const totalTasks = tasks.length;
+
+  const progressPercentage =
+    totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+  const nextTask =
+    tasks.find((task) => task.status === "in-progress") ??
+    tasks.find((task) => task.status === "upcoming");
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.screen}>
@@ -260,9 +277,11 @@ export default function HomeScreen() {
               <Text style={styles.moreIcon}>⋮</Text>
             </View>
 
-            <Text style={styles.taskTitle}>Design remaining sections</Text>
+            <Text style={styles.taskTitle}>
+              {nextTask?.title || "No tasks scheduled"}
+            </Text>
 
-            <Text style={styles.taskTime}>10:00 - 11:30 AM</Text>
+            <Text style={styles.taskTime}>{nextTask?.time || "N/A"}</Text>
 
             <View style={styles.taskBottomRow}>
               <View style={styles.taskStatus}>
@@ -273,7 +292,7 @@ export default function HomeScreen() {
                 <View style={styles.taskProgressFill} />
               </View>
 
-              <Text style={styles.taskPercentage}>0%</Text>
+              <Text style={styles.taskPercentage}>{progressPercentage}%</Text>
             </View>
           </View>
 
@@ -281,7 +300,7 @@ export default function HomeScreen() {
           <View style={styles.progressHeader}>
             <Text style={styles.sectionTitle}>Today's progress</Text>
 
-            <Text style={styles.progressSummary}>3 of 6 tasks</Text>
+            <Text style={styles.progressSummary}>{totalTasks} tasks</Text>
           </View>
 
           <View style={styles.progressRow}>
@@ -289,7 +308,7 @@ export default function HomeScreen() {
               <View style={styles.progressFill} />
             </View>
 
-            <Text style={styles.progressPercentage}>50%</Text>
+            <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
           </View>
 
           {/* Today's schedule */}
