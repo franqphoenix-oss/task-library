@@ -11,6 +11,7 @@ import type { Task } from "../types/task";
 
 type TaskContextValue = {
   tasks: Task[];
+  addTask: (task: Task) => void;
 };
 
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
@@ -20,11 +21,14 @@ type TaskProviderProps = {
 };
 
 export function TaskProvider({ children }: TaskProviderProps) {
-  const [tasks] = useState<Task[]>(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
 
   const value = useMemo<TaskContextValue>(
     () => ({
       tasks,
+      addTask: (task) => {
+        setTasks((currentTasks) => [...currentTasks, task]);
+      },
     }),
     [tasks],
   );
