@@ -3,7 +3,10 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "../constants/colors";
+import { AnalyticsIcon } from "../components/icons/AnalyticsIcon";
+import { HomeIcon } from "../components/icons/HomeIcon";
+import { SettingsIcon } from "../components/icons/SettingsIcon";
+import { TasksIcon } from "../components/icons/TasksIcon";
 import { useTasks } from "../context/TaskContext";
 
 import { homeStyles } from "@/features/home/home.styles";
@@ -17,166 +20,6 @@ const dates = [
   { day: "Sat", date: "26" },
   { day: "Sun", date: "27" },
 ];
-
-function HomeIcon({ active = false }: { active?: boolean }) {
-  const color = active ? colors.accent : colors.textMuted;
-
-  return (
-    <View style={homeStyles.iconBox}>
-      <View
-        style={[
-          homeStyles.houseRoof,
-          {
-            borderBottomColor: color,
-          },
-        ]}
-      />
-      <View
-        style={[
-          homeStyles.houseBody,
-          {
-            borderColor: color,
-          },
-        ]}
-      >
-        <View
-          style={[
-            homeStyles.houseDoor,
-            {
-              backgroundColor: color,
-            },
-          ]}
-        />
-      </View>
-    </View>
-  );
-}
-
-function TasksIcon({ active = false }: { active?: boolean }) {
-  const color = active ? colors.accent : colors.textMuted;
-
-  return (
-    <View
-      style={[
-        homeStyles.taskIcon,
-        {
-          borderColor: color,
-        },
-      ]}
-    >
-      <View style={homeStyles.taskIconLine}>
-        <View
-          style={[
-            homeStyles.taskCheck,
-            {
-              borderColor: color,
-            },
-          ]}
-        />
-        <View
-          style={[
-            homeStyles.taskLine,
-            {
-              backgroundColor: color,
-            },
-          ]}
-        />
-      </View>
-
-      <View style={homeStyles.taskIconLine}>
-        <View
-          style={[
-            homeStyles.taskCheck,
-            {
-              borderColor: color,
-            },
-          ]}
-        />
-        <View
-          style={[
-            homeStyles.taskLine,
-            {
-              backgroundColor: color,
-            },
-          ]}
-        />
-      </View>
-
-      <View style={homeStyles.taskIconLine}>
-        <View
-          style={[
-            homeStyles.taskCheck,
-            {
-              borderColor: color,
-            },
-          ]}
-        />
-        <View
-          style={[
-            homeStyles.taskLine,
-            {
-              backgroundColor: color,
-            },
-          ]}
-        />
-      </View>
-    </View>
-  );
-}
-
-function AnalyticsIcon({ active = false }: { active?: boolean }) {
-  const color = active ? colors.accent : colors.textMuted;
-
-  return (
-    <View style={homeStyles.analyticsIcon}>
-      <View
-        style={[
-          homeStyles.chartBar,
-          homeStyles.chartBarOne,
-          { backgroundColor: color },
-        ]}
-      />
-      <View
-        style={[
-          homeStyles.chartBar,
-          homeStyles.chartBarTwo,
-          { backgroundColor: color },
-        ]}
-      />
-      <View
-        style={[
-          homeStyles.chartBar,
-          homeStyles.chartBarThree,
-          { backgroundColor: color },
-        ]}
-      />
-    </View>
-  );
-}
-
-function SettingsIcon({ active = false }: { active?: boolean }) {
-  const color = active ? colors.accent : colors.textMuted;
-
-  return (
-    <View
-      style={[
-        homeStyles.settingsIcon,
-        {
-          borderColor: color,
-        },
-      ]}
-    >
-      <View
-        style={[
-          homeStyles.settingsCenter,
-          {
-            backgroundColor: color,
-          },
-        ]}
-      />
-    </View>
-  );
-}
 
 export default function HomeScreen() {
   const { tasks } = useTasks();
