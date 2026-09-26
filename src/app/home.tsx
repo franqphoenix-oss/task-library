@@ -1,41 +1,21 @@
 import { router } from "expo-router";
+import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { colors } from "../constants/colors";
 import { useTasks } from "../context/TaskContext";
 
 import { homeStyles } from "@/features/home/home.styles";
-import { colors } from "../constants/colors";
 
 const dates = [
   { day: "Mon", date: "21" },
   { day: "Tue", date: "22" },
   { day: "Wed", date: "23" },
-  { day: "Thu", date: "24", active: true },
+  { day: "Thu", date: "24" },
   { day: "Fri", date: "25" },
   { day: "Sat", date: "26" },
   { day: "Sun", date: "27" },
-];
-
-const schedule = [
-  {
-    time: "10:00 - 11:30 AM",
-    title: "Design remaining sections",
-    icon: "✓",
-    type: "task",
-  },
-  {
-    time: "12:30 - 1:30 PM",
-    title: "Lunch break",
-    icon: "•",
-    type: "break",
-  },
-  {
-    time: "2:00 - 4:00 PM",
-    title: "Implement responsive layout",
-    icon: "✓",
-    type: "task",
-  },
 ];
 
 function HomeIcon({ active = false }: { active?: boolean }) {
@@ -200,6 +180,7 @@ function SettingsIcon({ active = false }: { active?: boolean }) {
 
 export default function HomeScreen() {
   const { tasks } = useTasks();
+  const [selectedDate, setSelectedDate] = useState("24");
 
   const completedTasks = tasks.filter(
     (task) => task.status === "completed",
@@ -242,33 +223,38 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={homeStyles.dateRow}
           >
-            {dates.map((item) => (
-              <View
-                key={item.date}
-                style={[
-                  homeStyles.dateItem,
-                  item.active && homeStyles.dateItemActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    homeStyles.dayText,
-                    item.active && homeStyles.activeDateText,
-                  ]}
-                >
-                  {item.day}
-                </Text>
+            {dates.map((item) => {
+              const active = item.date === selectedDate;
 
-                <Text
+              return (
+                <Pressable
+                  key={item.date}
                   style={[
-                    homeStyles.numberText,
-                    item.active && homeStyles.activeDateText,
+                    homeStyles.dateItem,
+                    active && homeStyles.dateItemActive,
                   ]}
+                  onPress={() => setSelectedDate(item.date)}
                 >
-                  {item.date}
-                </Text>
-              </View>
-            ))}
+                  <Text
+                    style={[
+                      homeStyles.dayText,
+                      active && homeStyles.activeDateText,
+                    ]}
+                  >
+                    {item.day}
+                  </Text>
+
+                  <Text
+                    style={[
+                      homeStyles.numberText,
+                      active && homeStyles.activeDateText,
+                    ]}
+                  >
+                    {item.date}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </ScrollView>
 
           {/* Next up */}
@@ -286,11 +272,17 @@ export default function HomeScreen() {
               {nextTask?.title || "No tasks scheduled"}
             </Text>
 
-            <Text style={homeStyles.taskTime}>{nextTask?.time || "N/A"}</Text>
+            <Text style={homeStyles.taskTime}>
+              {nextTask
+                ? `${nextTask.time} • ${nextTask.duration}`
+                : "You're all caught up"}
+            </Text>
 
             <View style={homeStyles.taskBottomRow}>
               <View style={homeStyles.taskStatus}>
-                <Text style={homeStyles.checkText}>✓</Text>
+                <Text style={homeStyles.checkText}>
+                  {nextTask?.status === "completed" ? "✓" : ""}
+                </Text>
               </View>
 
               <View style={homeStyles.taskProgressTrack}>
@@ -298,14 +290,14 @@ export default function HomeScreen() {
                   style={[
                     homeStyles.taskProgressFill,
                     {
-                      width: `${progressPercentage}%`,
+                      width: nextTask?.status === "completed" ? "100%" : "0%",
                     },
                   ]}
                 />
               </View>
 
               <Text style={homeStyles.taskPercentage}>
-                {progressPercentage}%
+                {nextTask?.status === "completed" ? "100%" : "—"}
               </Text>
             </View>
           </View>
@@ -314,7 +306,9 @@ export default function HomeScreen() {
           <View style={homeStyles.progressHeader}>
             <Text style={homeStyles.sectionTitle}>Today's progress</Text>
 
-            <Text style={homeStyles.progressSummary}>{totalTasks} tasks</Text>
+            <Text style={homeStyles.progressSummary}>
+              {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
+            </Text>
           </View>
 
           <View style={homeStyles.progressRow}>
@@ -339,36 +333,38 @@ export default function HomeScreen() {
             <Text style={homeStyles.sectionTitle}>Today's schedule</Text>
 
             <View style={homeStyles.scheduleCard}>
-              {schedule.map((item, index) => (
-                <View
-                  key={item.title}
-                  style={[
-                    homeStyles.scheduleItem,
-                    index !== schedule.length - 1 &&
-                      homeStyles.scheduleItemSpacing,
-                  ]}
-                >
-                  <Text style={homeStyles.scheduleTime}>{item.time}</Text>
-
-                  <View
-                    style={[
-                      homeStyles.scheduleIcon,
-                      item.type === "break" && homeStyles.breakIcon,
-                    ]}
-                  >
-                    <Text style={homeStyles.scheduleIconText}>{item.icon}</Text>
-                  </View>
-
-                  <Text
-                    style={[
-                      homeStyles.scheduleTitle,
-                      item.type === "break" && homeStyles.breakTitle,
-                    ]}
-                  >
-                    {item.title}
+              {tasks.length === 0 ? (
+                <View style={homeStyles.scheduleItem}>
+                  <Text style={homeStyles.scheduleTitle}>
+                    No tasks scheduled
                   </Text>
                 </View>
-              ))}
+              ) : (
+                tasks.map((task, index) => {
+                  const completed = task.status === "completed";
+
+                  return (
+                    <View
+                      key={task.id}
+                      style={[
+                        homeStyles.scheduleItem,
+                        index !== tasks.length - 1 &&
+                          homeStyles.scheduleItemSpacing,
+                      ]}
+                    >
+                      <Text style={homeStyles.scheduleTime}>{task.time}</Text>
+
+                      <View style={homeStyles.scheduleIcon}>
+                        <Text style={homeStyles.scheduleIconText}>
+                          {completed ? "✓" : "•"}
+                        </Text>
+                      </View>
+
+                      <Text style={homeStyles.scheduleTitle}>{task.title}</Text>
+                    </View>
+                  );
+                })
+              )}
             </View>
           </View>
         </ScrollView>
