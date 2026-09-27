@@ -50,7 +50,13 @@ export default function CreateTaskScreen() {
     };
 
     addTask(task);
-    router.back();
+
+    router.push({
+      pathname: "/ai-processing",
+      params: {
+        taskId: task.id,
+      },
+    });
   };
 
   return (
