@@ -1,6 +1,12 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
@@ -23,7 +29,16 @@ const dates = [
 export default function HomeScreen() {
   const { tasks } = useTasks();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
   const [selectedDate, setSelectedDate] = useState("24");
+
+  const horizontalPadding = 32;
+  const dateGap = 6;
+
+  const dateItemWidth = Math.max(
+    38,
+    (screenWidth - horizontalPadding - dateGap * 6) / 7,
+  );
 
   const completedTasks = tasks.filter(
     (task) => task.status === "completed",
@@ -74,6 +89,7 @@ export default function HomeScreen() {
                   key={item.date}
                   style={[
                     homeStyles.dateItem,
+                    { width: dateItemWidth },
                     active && homeStyles.dateItemActive,
                   ]}
                   onPress={() => setSelectedDate(item.date)}
@@ -216,6 +232,7 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [
             homeStyles.createButton,
+            { width: Math.min(128, screenWidth * 0.36) },
             { bottom: insets.bottom + 66 },
             pressed && homeStyles.buttonPressed,
           ]}

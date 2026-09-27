@@ -18,7 +18,7 @@ export const homeStyles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 128,
+    paddingBottom: 82,
   },
 
   header: {
@@ -57,13 +57,15 @@ export const homeStyles = StyleSheet.create({
   },
 
   dateRow: {
+    flexGrow: 1,
+    justifyContent: "center",
     gap: 6,
     marginBottom: spacing.md,
   },
 
   dateItem: {
-    width: 38,
-    height: 46,
+    height: 50,
+    minWidth: 38,
     borderRadius: radius.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -79,7 +81,7 @@ export const homeStyles = StyleSheet.create({
 
   dayText: {
     color: colors.textSecondary,
-    fontSize: 9,
+    fontSize: 10,
     marginBottom: 3,
   },
 
@@ -94,7 +96,7 @@ export const homeStyles = StyleSheet.create({
   },
 
   nextUpCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -237,7 +239,7 @@ export const homeStyles = StyleSheet.create({
 
   scheduleCard: {
     marginTop: spacing.sm,
-    padding: spacing.md,
+    padding: spacing.lg,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -288,44 +290,10 @@ export const homeStyles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
-  bottomNav: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 58,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: 4,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-  },
-
-  navItem: {
-    width: 60,
-    height: 46,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  navLabel: {
-    color: colors.textMuted,
-    fontSize: 8,
-    marginTop: 4,
-  },
-
-  navActive: {
-    color: colors.accent,
-  },
-
   createButton: {
     position: "absolute",
     right: spacing.lg,
-    height: 38,
-    paddingHorizontal: spacing.lg,
+    height: 40,
     borderRadius: radius.full,
     backgroundColor: colors.accent,
     flexDirection: "row",
@@ -338,12 +306,13 @@ export const homeStyles = StyleSheet.create({
       width: 0,
       height: 4,
     },
+    marginBottom: 10,
   },
 
   createPlus: {
     color: colors.white,
-    fontSize: 18,
-    lineHeight: 18,
+    fontSize: 19,
+    lineHeight: 19,
     marginRight: 5,
   },
 
