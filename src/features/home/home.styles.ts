@@ -111,6 +111,34 @@ export const homeStyles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
 
+  sectionLabel: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: typography.weights.medium,
+  },
+
+  nextUpPriority: {
+    color: colors.accent,
+    fontSize: 10,
+    fontWeight: typography.weights.semibold,
+  },
+
+  nextUpTitle: {
+    color: colors.text,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.sm,
+  },
+
+  nextUpMeta: {
+    gap: spacing.xs,
+  },
+
+  nextUpMetaText: {
+    color: colors.textSecondary,
+    fontSize: 10,
+  },
+
   nextUpTitleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -253,6 +281,21 @@ export const homeStyles = StyleSheet.create({
 
   scheduleItemSpacing: {
     marginBottom: spacing.md,
+  },
+
+  scheduleContent: {
+    flex: 1,
+  },
+
+  scheduleEmpty: {
+    color: colors.textSecondary,
+    fontSize: 10,
+  },
+
+  scheduleMeta: {
+    color: colors.textSecondary,
+    fontSize: 9,
+    marginTop: 2,
   },
 
   scheduleTime: {

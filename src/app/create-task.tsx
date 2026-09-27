@@ -1,3 +1,5 @@
+import { Picker } from "@expo/ui";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -14,109 +16,79 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BackIcon } from "../components/icons/BackIcon";
 import { useTasks } from "../context/TaskContext";
 import { createTaskStyles } from "../features/tasks/create-task.styles";
-import type { Task } from "../types/task";
 
-type RequiredField = "title" | "time" | "duration";
+import type { AvailableTime, TaskPriority } from "../types/task";
 
-function parseTime(value: string): string | null {
-  const normalized = value.trim().toUpperCase();
-  const match = normalized.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
+const MAX_GOAL_LENGTH = 500;
 
-  if (!match) {
-    return null;
-  }
+const PRIORITY_OPTIONS = [
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" },
+];
 
-  let hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const period = match[3];
+const AVAILABLE_TIME_OPTIONS = [
+  { label: "15–30 minutes", value: "15-30" },
+  { label: "30–60 minutes", value: "30-60" },
+  { label: "1–2 hours", value: "60-120" },
+  { label: "2–4 hours", value: "120-240" },
+  { label: "4+ hours", value: "240+" },
+];
 
-  if (minute > 59) {
-    return null;
-  }
+type FieldError = "goal" | "deadline" | "priority" | "availableTime" | "";
 
-  if (period) {
-    if (hour < 1 || hour > 12) {
-      return null;
-    }
-
-    if (period === "AM") {
-      hour = hour === 12 ? 0 : hour;
-    } else {
-      hour = hour === 12 ? 12 : hour + 12;
-    }
-  } else if (hour > 23) {
-    return null;
-  }
-
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function parseDuration(value: string): number | null {
-  const normalized = value.trim().toLowerCase();
-
-  const hourMatch = normalized.match(/(\d+(?:.\d+)?)\s*h/);
-  const minuteMatch = normalized.match(/(\d+)\s*m/);
-
-  if (!hourMatch && !minuteMatch) {
-    return null;
-  }
-
-  const hours = hourMatch ? Number(hourMatch[1]) : 0;
-  const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
-
-  const totalMinutes = Math.round(hours * 60 + minutes);
-
-  return totalMinutes > 0 ? totalMinutes : null;
+function formatDeadline(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function CreateTaskScreen() {
-  const { addTask } = useTasks();
+  const { createTask } = useTasks();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [time, setTime] = useState("");
-  const [duration, setDuration] = useState("");
-  const [error, setError] = useState<RequiredField | "">("");
+  const [goal, setGoal] = useState("");
+  const [deadline, setDeadline] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [priority, setPriority] = useState("");
+  const [availableTime, setAvailableTime] = useState("");
+  const [error, setError] = useState<FieldError>("");
 
-  const handleSubmit = () => {
-    const missingField: RequiredField | "" = !title.trim()
-      ? "title"
-      : !time.trim()
-        ? "time"
-        : !duration.trim()
-          ? "duration"
-          : "";
-
-    if (missingField) {
-      setError(missingField);
+  const handleCreatePlan = () => {
+    if (!goal.trim()) {
+      setError("goal");
       return;
     }
 
-    const startTime = parseTime(time);
-    const durationMinutes = parseDuration(duration);
-
-    if (!startTime) {
-      setError("time");
+    if (!deadline) {
+      setError("deadline");
       return;
     }
 
-    if (!durationMinutes) {
-      setError("duration");
+    if (!priority) {
+      setError("priority");
       return;
     }
 
-    const task: Task = {
-      id: Date.now().toString(),
-      title: title.trim(),
-      description: description.trim() || undefined,
-      createdAt: new Date().toISOString(),
-      scheduledDate: new Date().toISOString().slice(0, 10),
-      startTime,
-      durationMinutes,
-      status: "upcoming",
-    };
+    if (!availableTime) {
+      setError("availableTime");
+      return;
+    }
 
-    addTask(task);
+    /*
+     * The current Task model still contains the older scheduling fields.
+     * We keep the existing fields populated here so the current AI-processing
+     * flow continues to work while the task model is migrated to the new
+     * goal/deadline/priority/availability structure.
+     */
+    const task = createTask({
+      goal: goal.trim(),
+      deadline: deadline.toISOString(),
+      priority: priority as TaskPriority,
+      availableTime: availableTime as AvailableTime,
+    });
 
     router.push({
       pathname: "/ai-processing",
@@ -124,152 +96,276 @@ export default function CreateTaskScreen() {
         taskId: task.id,
       },
     });
-  };
 
-  return (
-    <SafeAreaView style={createTaskStyles.safeArea} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView
-        style={createTaskStyles.keyboardView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          contentContainerStyle={createTaskStyles.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+    return (
+      <SafeAreaView style={createTaskStyles.safeArea} edges={["top", "bottom"]}>
+        <KeyboardAvoidingView
+          style={createTaskStyles.keyboardView}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View style={createTaskStyles.header}>
-            <Pressable
-              accessibilityLabel="Go back"
-              accessibilityRole="button"
-              onPress={() => router.back()}
-              style={({ pressed }) => [
-                createTaskStyles.backButton,
-                pressed && createTaskStyles.buttonPressed,
-              ]}
-            >
-              <BackIcon />
-            </Pressable>
+          <ScrollView
+            contentContainerStyle={createTaskStyles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={createTaskStyles.header}>
+              <Pressable
+                accessibilityLabel="Go back"
+                accessibilityRole="button"
+                onPress={() => router.back()}
+                style={({ pressed }) => [
+                  createTaskStyles.backButton,
+                  pressed && createTaskStyles.buttonPressed,
+                ]}
+              >
+                <BackIcon />
+              </Pressable>
 
-            <View style={createTaskStyles.heading}>
-              <Text style={createTaskStyles.title}>Create Task</Text>
-              <Text style={createTaskStyles.subtitle}>
-                Turn your idea into an actionable task.
+              <View style={createTaskStyles.heading}>
+                <Text style={createTaskStyles.title}>Create a new task</Text>
+                <Text style={createTaskStyles.subtitle}>
+                  Let AI turn your goal into a plan.
+                </Text>
+              </View>
+            </View>
+
+            <View style={createTaskStyles.form}>
+              {/* Goal */}
+              <View style={createTaskStyles.field}>
+                <View style={createTaskStyles.labelRow}>
+                  <Text style={createTaskStyles.label}>Your goal</Text>
+                  <Text style={createTaskStyles.required}>Required</Text>
+                </View>
+
+                <TextInput
+                  accessibilityLabel="Your goal"
+                  autoCapitalize="sentences"
+                  multiline
+                  maxLength={MAX_GOAL_LENGTH}
+                  onChangeText={(value) => {
+                    setGoal(value);
+
+                    if (error === "goal") {
+                      setError("");
+                    }
+                  }}
+                  placeholder="What do you want to accomplish?"
+                  placeholderTextColor={createTaskStyles.placeholder.color}
+                  style={[
+                    createTaskStyles.goalInput,
+                    error === "goal" && createTaskStyles.inputInvalid,
+                  ]}
+                  textAlignVertical="top"
+                  value={goal}
+                />
+
+                <View style={createTaskStyles.helperRow}>
+                  <Text style={createTaskStyles.helperText}>
+                    Be as specific as you can. AI will use this as the basis for
+                    your plan.
+                  </Text>
+
+                  <Text style={createTaskStyles.characterCount}>
+                    {goal.length}/{MAX_GOAL_LENGTH}
+                  </Text>
+                </View>
+
+                {error === "goal" && (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={createTaskStyles.error}
+                  >
+                    Tell us what you want to accomplish.
+                  </Text>
+                )}
+              </View>
+
+              {/* Deadline */}
+              <View style={createTaskStyles.field}>
+                <View style={createTaskStyles.labelRow}>
+                  <Text style={createTaskStyles.label}>Deadline</Text>
+                  <Text style={createTaskStyles.required}>Required</Text>
+                </View>
+
+                <Pressable
+                  accessibilityLabel="Select deadline"
+                  accessibilityRole="button"
+                  onPress={() => {
+                    setShowDatePicker(true);
+                    if (error === "deadline") {
+                      setError("");
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    createTaskStyles.selectButton,
+                    error === "deadline" && createTaskStyles.inputInvalid,
+                    pressed && createTaskStyles.buttonPressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      createTaskStyles.selectText,
+                      !deadline && createTaskStyles.selectPlaceholder,
+                    ]}
+                  >
+                    {deadline ? formatDeadline(deadline) : "Select a deadline"}
+                  </Text>
+
+                  <Text style={createTaskStyles.chevron}>›</Text>
+                </Pressable>
+
+                {showDatePicker && (
+                  <View style={createTaskStyles.datePickerContainer}>
+                    <DateTimePicker
+                      value={deadline ?? new Date()}
+                      mode="date"
+                      minimumDate={new Date()}
+                      presentation="dialog"
+                      onValueChange={(_event, selectedDate) => {
+                        setDeadline(selectedDate);
+                        setShowDatePicker(false);
+                        setError("");
+                      }}
+                      onDismiss={() => setShowDatePicker(false)}
+                    />
+                  </View>
+                )}
+
+                <Text style={createTaskStyles.helperText}>
+                  This is the target date the plan should work toward.
+                </Text>
+
+                {error === "deadline" && (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={createTaskStyles.error}
+                  >
+                    Select a deadline for this task.
+                  </Text>
+                )}
+              </View>
+
+              {/* Priority */}
+              <View style={createTaskStyles.field}>
+                <View style={createTaskStyles.labelRow}>
+                  <Text style={createTaskStyles.label}>Priority</Text>
+                  <Text style={createTaskStyles.required}>Required</Text>
+                </View>
+
+                <View
+                  style={[
+                    createTaskStyles.pickerContainer,
+                    error === "priority" && createTaskStyles.inputInvalid,
+                  ]}
+                >
+                  <Picker
+                    selectedValue={priority}
+                    onValueChange={(value) => {
+                      setPriority(value);
+
+                      if (error === "priority") {
+                        setError("");
+                      }
+                    }}
+                  >
+                    <Picker.Item label="Select priority" value="" />
+
+                    {PRIORITY_OPTIONS.map((option) => (
+                      <Picker.Item
+                        key={option.value}
+                        label={option.label}
+                        value={option.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+
+                <Text style={createTaskStyles.helperText}>
+                  Priority helps determine how frequently you'll be reminded
+                  about this task.
+                </Text>
+
+                {error === "priority" && (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={createTaskStyles.error}
+                  >
+                    Select a priority.
+                  </Text>
+                )}
+              </View>
+
+              {/* Available time */}
+              <View style={createTaskStyles.field}>
+                <View style={createTaskStyles.labelRow}>
+                  <Text style={createTaskStyles.label}>Available time</Text>
+                  <Text style={createTaskStyles.required}>Required</Text>
+                </View>
+
+                <View
+                  style={[
+                    createTaskStyles.pickerContainer,
+                    error === "availableTime" && createTaskStyles.inputInvalid,
+                  ]}
+                >
+                  <Picker
+                    selectedValue={availableTime}
+                    onValueChange={(value) => {
+                      setAvailableTime(value);
+
+                      if (error === "availableTime") {
+                        setError("");
+                      }
+                    }}
+                  >
+                    <Picker.Item label="How much time can you give?" value="" />
+
+                    {AVAILABLE_TIME_OPTIONS.map((option) => (
+                      <Picker.Item
+                        key={option.value}
+                        label={option.label}
+                        value={option.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+
+                <Text style={createTaskStyles.helperText}>
+                  AI will use this to build a realistic schedule around your
+                  available time.
+                </Text>
+
+                {error === "availableTime" && (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={createTaskStyles.error}
+                  >
+                    Select how much time you have available.
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View style={createTaskStyles.submitSection}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleCreatePlan}
+                style={({ pressed }) => [
+                  createTaskStyles.submitButton,
+                  pressed && createTaskStyles.buttonPressed,
+                ]}
+              >
+                <Text style={createTaskStyles.submitText}>Create Plan</Text>
+              </Pressable>
+
+              <Text style={createTaskStyles.submitHint}>
+                AI will break your goal into practical steps and build a plan
+                around your deadline.
               </Text>
             </View>
-          </View>
-          <View style={createTaskStyles.form}>
-            <View style={createTaskStyles.field}>
-              <Text style={createTaskStyles.label}>Task title</Text>
-              <TextInput
-                accessibilityLabel="Task title"
-                autoCapitalize="sentences"
-                onChangeText={(value) => {
-                  setTitle(value);
-                  if (error === "title") setError("");
-                }}
-                placeholder="What do you need to get done?"
-                placeholderTextColor={createTaskStyles.placeholder.color}
-                returnKeyType="next"
-                style={[
-                  createTaskStyles.input,
-                  error === "title" && createTaskStyles.inputInvalid,
-                ]}
-                value={title}
-              />
-              {error === "title" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Enter a valid task title.
-                </Text>
-              )}
-            </View>
-
-            <View style={createTaskStyles.field}>
-              <Text style={createTaskStyles.label}>Description (optional)</Text>
-              <TextInput
-                accessibilityLabel="Description (optional)"
-                autoCapitalize="sentences"
-                multiline
-                onChangeText={setDescription}
-                placeholder="Add some context..."
-                placeholderTextColor={createTaskStyles.placeholder.color}
-                style={[
-                  createTaskStyles.input,
-                  createTaskStyles.descriptionInput,
-                ]}
-                textAlignVertical="top"
-                value={description}
-              />
-            </View>
-
-            <View style={createTaskStyles.field}>
-              <Text style={createTaskStyles.label}>Time</Text>
-              <TextInput
-                accessibilityLabel="Time"
-                onChangeText={(value) => {
-                  setTime(value);
-                  if (error === "time") setError("");
-                }}
-                placeholder="e.g. 10:00 AM"
-                placeholderTextColor={createTaskStyles.placeholder.color}
-                returnKeyType="next"
-                style={[
-                  createTaskStyles.input,
-                  error === "time" && createTaskStyles.inputInvalid,
-                ]}
-                value={time}
-              />
-              {error === "time" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Enter a valid time, e.g. 10:00 AM.
-                </Text>
-              )}
-            </View>
-
-            <View style={createTaskStyles.field}>
-              <Text style={createTaskStyles.label}>Duration</Text>
-              <TextInput
-                accessibilityLabel="Duration"
-                onChangeText={(value) => {
-                  setDuration(value);
-                  if (error === "duration") setError("");
-                }}
-                placeholder="e.g. 1h 30m"
-                placeholderTextColor={createTaskStyles.placeholder.color}
-                returnKeyType="done"
-                style={[
-                  createTaskStyles.input,
-                  error === "duration" && createTaskStyles.inputInvalid,
-                ]}
-                value={duration}
-              />
-              {error === "duration" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Enter a valid duration, e.g. 1h 30m.
-                </Text>
-              )}
-            </View>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleSubmit}
-            style={({ pressed }) => [
-              createTaskStyles.submitButton,
-              pressed && createTaskStyles.buttonPressed,
-            ]}
-          >
-            <Text style={createTaskStyles.submitText}>Create Task</Text>
-          </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  };
 }

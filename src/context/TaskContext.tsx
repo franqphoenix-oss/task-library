@@ -8,13 +8,18 @@ import {
 } from "react";
 
 import { mockTasks } from "../data/mockTasks";
-import type { GeneratedTaskPlan, Subtask, Task } from "../types/task";
+import type {
+  GeneratedTaskPlan,
+  Subtask,
+  Task,
+  TaskInput,
+} from "../types/task";
 
 import { normalizeTaskPlan } from "@/services/taskPlanner";
 
 type TaskContextValue = {
   tasks: Task[];
-  addTask: (task: Task) => void;
+  createTask: (input: TaskInput) => Task;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
   getTaskById: (taskId: string) => Task | undefined;
@@ -36,8 +41,17 @@ type TaskProviderProps = {
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
 
-  const addTask = useCallback((task: Task) => {
+  const createTask = useCallback((input: TaskInput) => {
+    const task: Task = {
+      id: Date.now().toString(),
+      ...input,
+      createdAt: new Date().toISOString(),
+      status: "upcoming",
+    };
+
     setTasks((currentTasks) => [...currentTasks, task]);
+
+    return task;
   }, []);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
@@ -117,7 +131,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
   const value = useMemo<TaskContextValue>(
     () => ({
       tasks,
-      addTask,
+      createTask,
       updateTask,
       deleteTask,
       getTaskById,
@@ -127,7 +141,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
     }),
     [
       tasks,
-      addTask,
+      createTask,
       updateTask,
       deleteTask,
       getTaskById,

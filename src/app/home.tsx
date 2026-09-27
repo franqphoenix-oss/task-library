@@ -49,9 +49,20 @@ export default function HomeScreen() {
   const progressPercentage =
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
-  const nextTask =
-    tasks.find((task) => task.status === "in-progress") ??
-    tasks.find((task) => task.status === "upcoming");
+  const nextTask = tasks.find((task) => task.status !== "completed");
+
+  const getDeadlineLabel = (deadline: string) => {
+    const date = new Date(deadline);
+
+    if (Number.isNaN(date.getTime())) {
+      return "No deadline";
+    }
+
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <SafeAreaView style={homeStyles.safeArea} edges={["top"]}>
@@ -117,49 +128,46 @@ export default function HomeScreen() {
           </ScrollView>
 
           {/* Next up */}
-          <View style={homeStyles.nextUpCard}>
-            <View style={homeStyles.nextUpHeader}>
-              <View style={homeStyles.nextUpTitleRow}>
-                <View style={homeStyles.nextUpDot} />
-                <Text style={homeStyles.nextUpLabel}>Next up</Text>
-              </View>
+          {nextTask ? (
+            <View style={homeStyles.nextUpCard}>
+              <View style={homeStyles.nextUpHeader}>
+                <Text style={homeStyles.sectionLabel}>NEXT UP</Text>
 
-              <Text style={homeStyles.moreIcon}>⋮</Text>
-            </View>
-
-            <Text style={homeStyles.taskTitle}>
-              {nextTask?.title || "No tasks scheduled"}
-            </Text>
-
-            <Text style={homeStyles.taskTime}>
-              {nextTask
-                ? `${nextTask.startTime} • ${nextTask.durationMinutes} min`
-                : "You're all caught up"}
-            </Text>
-
-            <View style={homeStyles.taskBottomRow}>
-              <View style={homeStyles.taskStatus}>
-                <Text style={homeStyles.checkText}>
-                  {nextTask?.status === "completed" ? "✓" : ""}
+                <Text style={homeStyles.nextUpPriority}>
+                  {nextTask.priority.toUpperCase()}
                 </Text>
               </View>
 
-              <View style={homeStyles.taskProgressTrack}>
-                <View
-                  style={[
-                    homeStyles.taskProgressFill,
-                    {
-                      width: nextTask?.status === "completed" ? "100%" : "0%",
-                    },
-                  ]}
-                />
-              </View>
+              <Text style={homeStyles.nextUpTitle} numberOfLines={2}>
+                {nextTask.goal}
+              </Text>
 
-              <Text style={homeStyles.taskPercentage}>
-                {nextTask?.status === "completed" ? "100%" : "—"}
+              <View style={homeStyles.nextUpMeta}>
+                <Text style={homeStyles.nextUpMetaText}>
+                  Deadline · {getDeadlineLabel(nextTask.deadline)}
+                </Text>
+
+                {nextTask.plan && (
+                  <Text style={homeStyles.nextUpMetaText}>
+                    {
+                      nextTask.plan.subtasks.filter(
+                        (subtask) => subtask.status === "completed",
+                      ).length
+                    }{" "}
+                    / {nextTask.plan.subtasks.length} steps
+                  </Text>
+                )}
+              </View>
+            </View>
+          ) : (
+            <View style={homeStyles.nextUpCard}>
+              <Text style={homeStyles.sectionLabel}>NEXT UP</Text>
+              <Text style={homeStyles.nextUpTitle}>No active tasks</Text>
+              <Text style={homeStyles.nextUpMetaText}>
+                Create a task to start building your plan.
               </Text>
             </View>
-          </View>
+          )}
 
           {/* Today's progress */}
           <View style={homeStyles.progressHeader}>
@@ -192,39 +200,38 @@ export default function HomeScreen() {
             <Text style={homeStyles.sectionTitle}>Today's schedule</Text>
 
             <View style={homeStyles.scheduleCard}>
-              {tasks.length === 0 ? (
+              {tasks.every((task) => task.status === "completed") ? (
                 <View style={homeStyles.scheduleItem}>
-                  <Text style={homeStyles.scheduleTitle}>
+                  <Text style={homeStyles.scheduleEmpty}>
                     No tasks scheduled
                   </Text>
                 </View>
               ) : (
-                tasks.map((task, index) => {
-                  const completed = task.status === "completed";
-
-                  return (
+                tasks
+                  .filter((task) => task.status !== "completed")
+                  .map((task, index, activeTasks) => (
                     <View
                       key={task.id}
                       style={[
                         homeStyles.scheduleItem,
-                        index !== tasks.length - 1 &&
+                        index !== activeTasks.length - 1 &&
                           homeStyles.scheduleItemSpacing,
                       ]}
                     >
-                      <Text style={homeStyles.scheduleTime}>
-                        {task.startTime}
-                      </Text>
+                      <View style={homeStyles.scheduleContent}>
+                        <Text
+                          style={homeStyles.scheduleTitle}
+                          numberOfLines={1}
+                        >
+                          {task.goal}
+                        </Text>
 
-                      <View style={homeStyles.scheduleIcon}>
-                        <Text style={homeStyles.scheduleIconText}>
-                          {completed ? "✓" : "•"}
+                        <Text style={homeStyles.scheduleMeta}>
+                          Deadline · {getDeadlineLabel(task.deadline)}
                         </Text>
                       </View>
-
-                      <Text style={homeStyles.scheduleTitle}>{task.title}</Text>
                     </View>
-                  );
-                })
+                  ))
               )}
             </View>
           </View>

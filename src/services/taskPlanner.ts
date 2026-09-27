@@ -1,10 +1,18 @@
 import type { GeneratedTaskPlan, Task, TaskPlan } from "../types/task";
 
+const AVAILABLE_TIME_LABELS = {
+  "15-30": "15–30 minutes",
+  "30-60": "30–60 minutes",
+  "60-120": "1–2 hours",
+  "120-240": "2–4 hours",
+  "240+": "4+ hours",
+} as const;
+
 export function createMockTaskPlan(task: Task): GeneratedTaskPlan {
-  const context = task.description ? ` Focus: ${task.description}` : "";
+  const availableTime = AVAILABLE_TIME_LABELS[task.availableTime];
 
   return {
-    summary: `A practical step-by-step plan for “${task.title}”.${context}`,
+    summary: `A practical step-by-step plan for “${task.goal}”, designed around your ${availableTime} availability and ${task.priority} priority.`,
     subtasks: [
       {
         title: "Define the outcome",
@@ -20,13 +28,14 @@ export function createMockTaskPlan(task: Task): GeneratedTaskPlan {
       },
       {
         title: "Complete the main work",
-        description: `Work through the planned actions within the available ${task.durationMinutes} minutes.`,
-        durationMinutes: task.durationMinutes,
+        description:
+          "Work through the main actions while staying within your available time.",
+        durationMinutes: 30,
       },
       {
         title: "Review and finish",
         description:
-          "Check the result, fix anything missing, and mark the task complete.",
+          "Check the result, fix anything missing, and prepare the task for completion.",
         durationMinutes: 10,
       },
     ],
