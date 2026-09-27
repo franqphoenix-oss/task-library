@@ -6,7 +6,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTasks } from "../context/TaskContext";
 import { aiProcessingStyles } from "../features/tasks/ai-processing.styles";
 
-import { createMockTaskPlan } from "../services/taskPlanner";
+import {
+  createMockTaskPlan,
+  validateGeneratedTaskPlan,
+} from "../services/taskPlanner";
 
 export default function AiProcessingScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
@@ -26,9 +29,14 @@ export default function AiProcessingScreen() {
     }
 
     const timeout = setTimeout(() => {
-      const plan = createMockTaskPlan(task);
+      const generatedPlan = createMockTaskPlan(task);
 
-      attachPlan(task.id, plan);
+      if (!validateGeneratedTaskPlan(generatedPlan)) {
+        router.replace("/home");
+        return;
+      }
+
+      attachPlan(task.id, generatedPlan);
 
       router.replace({
         pathname: "/generated-plan",

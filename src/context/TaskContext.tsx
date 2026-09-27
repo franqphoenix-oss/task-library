@@ -8,7 +8,9 @@ import {
 } from "react";
 
 import { mockTasks } from "../data/mockTasks";
-import type { Subtask, Task, TaskPlan } from "../types/task";
+import type { GeneratedTaskPlan, Subtask, Task } from "../types/task";
+
+import { normalizeTaskPlan } from "@/services/taskPlanner";
 
 type TaskContextValue = {
   tasks: Task[];
@@ -16,7 +18,7 @@ type TaskContextValue = {
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
   getTaskById: (taskId: string) => Task | undefined;
-  attachPlan: (taskId: string, plan: TaskPlan) => void;
+  attachPlan: (taskId: string, generatedPlan: GeneratedTaskPlan) => void;
   updateSubtask: (
     taskId: string,
     subtaskId: string,
@@ -57,13 +59,21 @@ export function TaskProvider({ children }: TaskProviderProps) {
     [tasks],
   );
 
-  const attachPlan = useCallback((taskId: string, plan: TaskPlan) => {
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId ? { ...task, plan } : task,
-      ),
-    );
-  }, []);
+  const attachPlan = useCallback(
+    (taskId: string, generatedPlan: GeneratedTaskPlan) => {
+      setTasks((currentTasks) =>
+        currentTasks.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                plan: normalizeTaskPlan(task, generatedPlan),
+              }
+            : task,
+        ),
+      );
+    },
+    [],
+  );
 
   const updateSubtask = useCallback(
     (taskId: string, subtaskId: string, updates: Partial<Subtask>) => {
