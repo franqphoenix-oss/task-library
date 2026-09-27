@@ -17,8 +17,8 @@ export const homeStyles = StyleSheet.create({
 
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: 105,
+    paddingTop: spacing.md,
+    paddingBottom: 128,
   },
 
   header: {
@@ -324,27 +324,32 @@ export const homeStyles = StyleSheet.create({
   createButton: {
     position: "absolute",
     right: spacing.lg,
-    bottom: 66,
-    height: 32,
-    paddingHorizontal: spacing.md,
-    borderRadius: 16,
+    height: 38,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.full,
     backgroundColor: colors.accent,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
+    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
   },
 
   createPlus: {
     color: colors.white,
-    fontSize: 16,
-    lineHeight: 16,
-    marginRight: 4,
+    fontSize: 18,
+    lineHeight: 18,
+    marginRight: 5,
   },
 
   createText: {
     color: colors.white,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: typography.weights.semibold,
   },
 

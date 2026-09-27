@@ -3,13 +3,12 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnalyticsIcon } from "../components/icons/AnalyticsIcon";
-import { HomeIcon } from "../components/icons/HomeIcon";
-import { SettingsIcon } from "../components/icons/SettingsIcon";
-import { TasksIcon } from "../components/icons/TasksIcon";
 import { useTasks } from "../context/TaskContext";
 
 import { homeStyles } from "@/features/home/home.styles";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomNav } from "../components/navigation/BottomNav";
 
 const dates = [
   { day: "Mon", date: "21" },
@@ -23,6 +22,7 @@ const dates = [
 
 export default function HomeScreen() {
   const { tasks } = useTasks();
+  const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState("24");
 
   const completedTasks = tasks.filter(
@@ -216,6 +216,7 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [
             homeStyles.createButton,
+            { bottom: insets.bottom + 66 },
             pressed && homeStyles.buttonPressed,
           ]}
           onPress={() => router.push("/create-task")}
@@ -224,37 +225,7 @@ export default function HomeScreen() {
           <Text style={homeStyles.createText}>Create Task</Text>
         </Pressable>
 
-        {/* Bottom navigation */}
-        <View style={homeStyles.bottomNav}>
-          <Pressable style={homeStyles.navItem}>
-            <HomeIcon active />
-
-            <Text style={[homeStyles.navLabel, homeStyles.navActive]}>
-              Home
-            </Text>
-          </Pressable>
-
-          <Pressable style={homeStyles.navItem}>
-            <TasksIcon />
-
-            <Text style={homeStyles.navLabel}>Tasks</Text>
-          </Pressable>
-
-          <Pressable style={homeStyles.navItem}>
-            <AnalyticsIcon />
-
-            <Text style={homeStyles.navLabel}>Analytics</Text>
-          </Pressable>
-
-          <Pressable
-            style={homeStyles.navItem}
-            onPress={() => router.push("/settings")}
-          >
-            <SettingsIcon />
-
-            <Text style={homeStyles.navLabel}>Settings</Text>
-          </Pressable>
-        </View>
+        <BottomNav />
       </View>
     </SafeAreaView>
   );
