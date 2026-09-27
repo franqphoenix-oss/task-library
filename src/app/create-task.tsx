@@ -132,13 +132,11 @@ export default function CreateTaskScreen() {
         style={createTaskStyles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {" "}
         <ScrollView
           contentContainerStyle={createTaskStyles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {" "}
           <View style={createTaskStyles.header}>
             <Pressable
               accessibilityLabel="Go back"
@@ -149,8 +147,7 @@ export default function CreateTaskScreen() {
                 pressed && createTaskStyles.buttonPressed,
               ]}
             >
-              {" "}
-              <BackIcon />{" "}
+              <BackIcon />
             </Pressable>
 
             <View style={createTaskStyles.heading}>

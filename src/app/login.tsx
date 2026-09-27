@@ -93,7 +93,7 @@ export default function LoginScreen() {
           </View>
 
           <Text style={loginStyles.switchText}>
-            Don't have an account?{" "}
+            Don't have an account?
             <Text
               style={loginStyles.link}
               onPress={() => router.replace("/signup")}

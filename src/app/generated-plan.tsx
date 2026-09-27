@@ -28,14 +28,11 @@ export default function GeneratedPlanScreen() {
       style={generatedPlanStyles.safeArea}
       edges={["top", "bottom"]}
     >
-      {" "}
       <ScrollView
         contentContainerStyle={generatedPlanStyles.content}
         showsVerticalScrollIndicator={false}
       >
-        {" "}
         <View style={generatedPlanStyles.header}>
-          {" "}
           <Text style={generatedPlanStyles.eyebrow}>AI PLAN</Text>
           <Text style={generatedPlanStyles.title}>Your plan is ready</Text>
           <Text style={generatedPlanStyles.summary}>{plan.summary}</Text>

@@ -99,7 +99,7 @@ export default function SignupScreen() {
           </View>
 
           <Text style={signupStyles.switchText}>
-            Already have an account?{" "}
+            Already have an account?
             <Text
               style={signupStyles.link}
               onPress={() => router.replace("/login")}

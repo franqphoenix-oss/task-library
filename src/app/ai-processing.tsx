@@ -6,6 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTasks } from "../context/TaskContext";
 import { aiProcessingStyles } from "../features/tasks/ai-processing.styles";
 
+import { createMockTaskPlan } from "../services/taskPlanner";
+
 export default function AiProcessingScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
   const { getTaskById, attachPlan } = useTasks();
@@ -41,12 +43,9 @@ export default function AiProcessingScreen() {
 
   return (
     <SafeAreaView style={aiProcessingStyles.safeArea}>
-      {" "}
       <View style={aiProcessingStyles.screen}>
-        {" "}
         <View style={aiProcessingStyles.indicator}>
-          {" "}
-          <View style={aiProcessingStyles.indicatorDot} />{" "}
+          <View style={aiProcessingStyles.indicatorDot} />
         </View>
         <Text style={aiProcessingStyles.title}>Building your plan</Text>
         <Text style={aiProcessingStyles.subtitle}>
