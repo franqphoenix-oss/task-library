@@ -133,7 +133,7 @@ export default function HomeScreen() {
 
             <Text style={homeStyles.taskTime}>
               {nextTask
-                ? `${nextTask.time} • ${nextTask.duration}`
+                ? `${nextTask.startTime} • ${nextTask.durationMinutes} min`
                 : "You're all caught up"}
             </Text>
 
@@ -211,7 +211,9 @@ export default function HomeScreen() {
                           homeStyles.scheduleItemSpacing,
                       ]}
                     >
-                      <Text style={homeStyles.scheduleTime}>{task.time}</Text>
+                      <Text style={homeStyles.scheduleTime}>
+                        {task.startTime}
+                      </Text>
 
                       <View style={homeStyles.scheduleIcon}>
                         <Text style={homeStyles.scheduleIconText}>

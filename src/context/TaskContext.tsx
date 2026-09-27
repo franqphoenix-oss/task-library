@@ -8,15 +8,21 @@ import {
 } from "react";
 
 import { mockTasks } from "../data/mockTasks";
-import type { Task } from "../types/task";
-import type { TaskPlan } from "../types/task-plan";
+import type { Subtask, Task, TaskPlan } from "../types/task";
 
 type TaskContextValue = {
   tasks: Task[];
-  activePlan: TaskPlan | null;
   addTask: (task: Task) => void;
+  updateTask: (taskId: string, updates: Partial<Task>) => void;
+  deleteTask: (taskId: string) => void;
   getTaskById: (taskId: string) => Task | undefined;
-  setActivePlan: (plan: TaskPlan) => void;
+  attachPlan: (taskId: string, plan: TaskPlan) => void;
+  updateSubtask: (
+    taskId: string,
+    subtaskId: string,
+    updates: Partial<Subtask>,
+  ) => void;
+  completeTask: (taskId: string) => void;
 };
 
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
@@ -27,10 +33,23 @@ type TaskProviderProps = {
 
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [activePlan, setActivePlan] = useState<TaskPlan | null>(null);
 
   const addTask = useCallback((task: Task) => {
     setTasks((currentTasks) => [...currentTasks, task]);
+  }, []);
+
+  const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId ? { ...task, ...updates } : task,
+      ),
+    );
+  }, []);
+
+  const deleteTask = useCallback((taskId: string) => {
+    setTasks((currentTasks) =>
+      currentTasks.filter((task) => task.id !== taskId),
+    );
   }, []);
 
   const getTaskById = useCallback(
@@ -38,15 +57,74 @@ export function TaskProvider({ children }: TaskProviderProps) {
     [tasks],
   );
 
+  const attachPlan = useCallback((taskId: string, plan: TaskPlan) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId ? { ...task, plan } : task,
+      ),
+    );
+  }, []);
+
+  const updateSubtask = useCallback(
+    (taskId: string, subtaskId: string, updates: Partial<Subtask>) => {
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => {
+          if (task.id !== taskId || !task.plan) {
+            return task;
+          }
+
+          return {
+            ...task,
+            plan: {
+              ...task.plan,
+              subtasks: task.plan.subtasks.map((subtask) =>
+                subtask.id === subtaskId ? { ...subtask, ...updates } : subtask,
+              ),
+            },
+          };
+        }),
+      );
+    },
+    [],
+  );
+
+  const completeTask = useCallback((taskId: string) => {
+    const completedAt = new Date().toISOString();
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              status: "completed",
+              completedAt,
+            }
+          : task,
+      ),
+    );
+  }, []);
+
   const value = useMemo<TaskContextValue>(
     () => ({
       tasks,
-      activePlan,
       addTask,
+      updateTask,
+      deleteTask,
       getTaskById,
-      setActivePlan,
+      attachPlan,
+      updateSubtask,
+      completeTask,
     }),
-    [tasks, activePlan, addTask, getTaskById],
+    [
+      tasks,
+      addTask,
+      updateTask,
+      deleteTask,
+      getTaskById,
+      attachPlan,
+      updateSubtask,
+      completeTask,
+    ],
   );
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
