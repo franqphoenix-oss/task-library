@@ -52,17 +52,6 @@ type TaskContextValue = {
   completeTask: (taskId: string) => void;
 };
 
-const [tasks, setTasks] = useState<Task[]>(
-  mockTasks.map((task) => ({
-    ...task,
-    stage: task.stage ?? "created",
-  })),
-);
-
-const tasksRef = useRef(tasks);
-
-tasksRef.current = tasks;
-
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
 
 type TaskProviderProps = {
@@ -76,6 +65,10 @@ export function TaskProvider({ children }: TaskProviderProps) {
       stage: task.stage ?? "created",
     })),
   );
+
+  const tasksRef = useRef(tasks);
+
+  tasksRef.current = tasks;
 
   const createTask = useCallback((input: TaskInput) => {
     const task: Task = {
