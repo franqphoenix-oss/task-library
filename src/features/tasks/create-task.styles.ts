@@ -372,4 +372,83 @@ export const createTaskStyles = StyleSheet.create({
     textAlign: "center",
     marginTop: spacing.lg,
   },
+
+  descriptionInput: {
+    minHeight: 112,
+  },
+
+  stepsSection: {
+    gap: spacing.md,
+  },
+
+  stepsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+
+  stepsHeading: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+
+  stepCount: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceElevated,
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.semibold,
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+
+  stepCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+
+  stepCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  stepNumber: {
+    color: colors.accent,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.semibold,
+  },
+
+  removeStepText: {
+    color: colors.danger,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
+  },
+
+  stepDescriptionInput: {
+    minHeight: 80,
+  },
+
+  addStepButton: {
+    minHeight: 46,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  addStepText: {
+    color: colors.accent,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+  },
 });

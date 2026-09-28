@@ -8,13 +8,14 @@ import {
   type ReactNode,
 } from "react";
 
-import { mockTasks } from "../data/mockTasks";
 import { normalizeTaskPlan } from "../services/taskPlanner";
 import type {
   GeneratedTaskPlan,
+  ManualSubtaskInput,
   Subtask,
   Task,
   TaskInput,
+  TaskPlan,
   TaskStage,
   TaskStatus,
 } from "../types/task";
@@ -23,6 +24,8 @@ type TaskContextValue = {
   tasks: Task[];
 
   createTask: (input: TaskInput) => Task;
+
+  createManualTask: (input: TaskInput, steps: ManualSubtaskInput[]) => Task;
 
   updateTask: (taskId: string, updates: Partial<Task>) => void;
 
@@ -65,24 +68,35 @@ function updateTaskById(
   return tasks.map((task) => (task.id === taskId ? updater(task) : task));
 }
 
-export function TaskProvider({ children }: TaskProviderProps) {
-  const [tasks, setTasks] = useState<Task[]>(
-    mockTasks.map((task) => ({
-      ...task,
-      stage: task.stage ?? "created",
+function createManualPlan(task: Task, steps: ManualSubtaskInput[]): TaskPlan {
+  return {
+    summary:
+      task.description?.trim() ||
+      `A manual plan for completing "${task.goal}".`,
+    generatedAt: new Date().toISOString(),
+    subtasks: steps.map((step, index) => ({
+      id: `${task.id}-${index + 1}`,
+      title: step.title.trim(),
+      description: step.description.trim(),
+      durationMinutes: step.durationMinutes,
+      status: "pending",
     })),
-  );
+  };
+}
+
+export function TaskProvider({ children }: TaskProviderProps) {
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   /*
-   * The ref gives non-rendering helpers access to the latest state.
-   * Rendered screens should read from `tasks` directly whenever possible.
+   * Non-rendering helpers can use this ref to access the latest state.
+   * Rendered screens should read `tasks` directly.
    */
   const tasksRef = useRef(tasks);
   tasksRef.current = tasks;
 
   const createTask = useCallback((input: TaskInput) => {
     const task: Task = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       ...input,
       createdAt: new Date().toISOString(),
       status: "upcoming",
@@ -93,6 +107,25 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
     return task;
   }, []);
+
+  const createManualTask = useCallback(
+    (input: TaskInput, steps: ManualSubtaskInput[]) => {
+      const task: Task = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        ...input,
+        createdAt: new Date().toISOString(),
+        status: "upcoming",
+        stage: "planned",
+      };
+
+      task.plan = createManualPlan(task, steps);
+
+      setTasks((currentTasks) => [...currentTasks, task]);
+
+      return task;
+    },
+    [],
+  );
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     setTasks((currentTasks) =>
@@ -222,13 +255,9 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
         return {
           ...task,
-
           status: allCompleted ? "completed" : "in-progress",
-
           stage: allCompleted ? "completed" : "active",
-
           completedAt: allCompleted ? completedAt : task.completedAt,
-
           plan: {
             ...task.plan,
             subtasks,
@@ -255,6 +284,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
     () => ({
       tasks,
       createTask,
+      createManualTask,
       updateTask,
       deleteTask,
       getTaskById,
@@ -270,6 +300,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
     [
       tasks,
       createTask,
+      createManualTask,
       updateTask,
       deleteTask,
       getTaskById,

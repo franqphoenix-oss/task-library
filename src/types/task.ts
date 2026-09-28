@@ -14,9 +14,16 @@ export type AvailableTime = "15-30" | "30-60" | "60-120" | "120-240" | "240+";
 
 export type TaskInput = {
   goal: string;
+  description?: string;
   deadline: string;
   priority: TaskPriority;
   availableTime: AvailableTime;
+};
+
+export type ManualSubtaskInput = {
+  title: string;
+  description: string;
+  durationMinutes: number;
 };
 
 export type GeneratedSubtask = {
@@ -49,10 +56,6 @@ export type Task = TaskInput & {
   id: string;
   createdAt: string;
 
-  /*
-   * status is the user's current task state.
-   * stage describes where the task is in the Task Library lifecycle.
-   */
   status: TaskStatus;
   stage: TaskStage;
 

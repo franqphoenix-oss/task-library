@@ -15,9 +15,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BackIcon } from "../components/icons/BackIcon";
 import { useTasks } from "../context/TaskContext";
 import { createTaskStyles } from "../features/tasks/create-task.styles";
-import type { AvailableTime, TaskPriority } from "../types/task";
+import type {
+  AvailableTime,
+  ManualSubtaskInput,
+  TaskPriority,
+} from "../types/task";
 
-const MAX_GOAL_LENGTH = 500;
+const MAX_GOAL_LENGTH = 120;
+const MAX_DESCRIPTION_LENGTH = 500;
+const MAX_STEP_TITLE_LENGTH = 100;
+const MAX_STEP_DESCRIPTION_LENGTH = 240;
 
 const priorityOptions: {
   label: string;
@@ -39,9 +46,23 @@ const availableTimeOptions: {
   { label: "4+ hours", value: "240+" },
 ];
 
-type RequiredField = "goal" | "deadline" | "priority" | "availableTime";
+const durationOptions = [
+  { label: "15 min", value: 15 },
+  { label: "30 min", value: 30 },
+  { label: "45 min", value: 45 },
+  { label: "60 min", value: 60 },
+  { label: "90 min", value: 90 },
+  { label: "2 hours", value: 120 },
+];
 
-type SelectType = "priority" | "availableTime" | null;
+type RequiredField =
+  | "goal"
+  | "deadline"
+  | "priority"
+  | "availableTime"
+  | "steps";
+
+type SelectType = "priority" | "availableTime" | "duration" | null;
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -78,7 +99,6 @@ function getMonthDays(monthDate: Date) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
-  // Convert Sunday = 0 into Monday = 0.
   const firstWeekday = (firstDay.getDay() + 6) % 7;
 
   const days: (Date | null)[] = [];
@@ -94,20 +114,40 @@ function getMonthDays(monthDate: Date) {
   return days;
 }
 
+type StepDraft = ManualSubtaskInput & {
+  id: string;
+};
+
+function createEmptyStep(): StepDraft {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: "",
+    description: "",
+    durationMinutes: 30,
+  };
+}
+
 export default function CreateTaskScreen() {
-  const { createTask } = useTasks();
+  const { createManualTask } = useTasks();
 
   const today = useMemo(() => startOfDay(new Date()), []);
 
   const [goal, setGoal] = useState("");
+  const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [priority, setPriority] = useState<TaskPriority | null>(null);
   const [availableTime, setAvailableTime] = useState<AvailableTime | null>(
     null,
   );
 
+  const [steps, setSteps] = useState<StepDraft[]>([createEmptyStep()]);
+
   const [openSelect, setOpenSelect] = useState<SelectType>(null);
+
+  const [durationStepId, setDurationStepId] = useState<string | null>(null);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
+
   const [calendarMonth, setCalendarMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
@@ -115,6 +155,35 @@ export default function CreateTaskScreen() {
   const [error, setError] = useState<RequiredField | "">("");
 
   const monthDays = useMemo(() => getMonthDays(calendarMonth), [calendarMonth]);
+
+  const selectedDurationStep = steps.find((step) => step.id === durationStepId);
+
+  const updateStep = (stepId: string, updates: Partial<ManualSubtaskInput>) => {
+    setSteps((currentSteps) =>
+      currentSteps.map((step) =>
+        step.id === stepId
+          ? {
+              ...step,
+              ...updates,
+            }
+          : step,
+      ),
+    );
+
+    if (error === "steps") {
+      setError("");
+    }
+  };
+
+  const addStep = () => {
+    setSteps((currentSteps) => [...currentSteps, createEmptyStep()]);
+  };
+
+  const removeStep = (stepId: string) => {
+    setSteps((currentSteps) =>
+      currentSteps.filter((step) => step.id !== stepId),
+    );
+  };
 
   const handleOpenDeadline = () => {
     setCalendarMonth(
@@ -163,15 +232,30 @@ export default function CreateTaskScreen() {
       return;
     }
 
-    const task = createTask({
-      goal: goal.trim(),
-      deadline: deadline.toISOString(),
-      priority,
-      availableTime,
-    });
+    const validSteps = steps.filter((step) => step.title.trim().length > 0);
 
-    router.push({
-      pathname: "/ai-processing",
+    if (validSteps.length === 0) {
+      setError("steps");
+      return;
+    }
+
+    const task = createManualTask(
+      {
+        goal: goal.trim(),
+        description: description.trim(),
+        deadline: deadline.toISOString(),
+        priority,
+        availableTime,
+      },
+      validSteps.map((step) => ({
+        title: step.title.trim(),
+        description: step.description.trim(),
+        durationMinutes: step.durationMinutes,
+      })),
+    );
+
+    router.replace({
+      pathname: "/task-details",
       params: {
         taskId: task.id,
       },
@@ -179,12 +263,25 @@ export default function CreateTaskScreen() {
   };
 
   const selectTitle =
-    openSelect === "priority" ? "Select priority" : "Select available time";
+    openSelect === "priority"
+      ? "Select priority"
+      : openSelect === "availableTime"
+        ? "Select available time"
+        : "Select duration";
 
   const selectOptions =
-    openSelect === "priority" ? priorityOptions : availableTimeOptions;
+    openSelect === "priority"
+      ? priorityOptions
+      : openSelect === "availableTime"
+        ? availableTimeOptions
+        : durationOptions;
 
-  const selectedValue = openSelect === "priority" ? priority : availableTime;
+  const selectedValue =
+    openSelect === "priority"
+      ? priority
+      : openSelect === "availableTime"
+        ? availableTime
+        : selectedDurationStep?.durationMinutes;
 
   return (
     <SafeAreaView style={createTaskStyles.safeArea} edges={["top", "bottom"]}>
@@ -214,22 +311,19 @@ export default function CreateTaskScreen() {
               <Text style={createTaskStyles.title}>Create a new task</Text>
 
               <Text style={createTaskStyles.subtitle}>
-                Let AI turn your goal into a plan
+                Build your plan manually. You control every step.
               </Text>
             </View>
           </View>
 
           <View style={createTaskStyles.form}>
-            {/* Goal */}
+            {/* Title */}
             <View style={createTaskStyles.field}>
-              <Text style={createTaskStyles.label}>
-                What do you want to accomplish?
-              </Text>
+              <Text style={createTaskStyles.label}>Task title</Text>
 
               <TextInput
-                accessibilityLabel="Task goal"
+                accessibilityLabel="Task title"
                 autoCapitalize="sentences"
-                multiline
                 maxLength={MAX_GOAL_LENGTH}
                 onChangeText={(value) => {
                   setGoal(value);
@@ -238,20 +332,18 @@ export default function CreateTaskScreen() {
                     setError("");
                   }
                 }}
-                placeholder="Describe what you need to get done..."
+                placeholder="What do you want to accomplish?"
                 placeholderTextColor={createTaskStyles.placeholder.color}
                 style={[
                   createTaskStyles.input,
-                  createTaskStyles.goalInput,
                   error === "goal" && createTaskStyles.inputInvalid,
                 ]}
-                textAlignVertical="top"
                 value={goal}
               />
 
               <View style={createTaskStyles.characterRow}>
                 <Text style={createTaskStyles.helperText}>
-                  Be specific so AI can create a useful plan.
+                  Give your task a clear, specific name.
                 </Text>
 
                 <Text style={createTaskStyles.characterCount}>
@@ -260,13 +352,33 @@ export default function CreateTaskScreen() {
               </View>
 
               {error === "goal" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Enter what you want to accomplish.
-                </Text>
+                <Text style={createTaskStyles.error}>Enter a task title.</Text>
               )}
+            </View>
+
+            {/* Description */}
+            <View style={createTaskStyles.field}>
+              <Text style={createTaskStyles.label}>Description</Text>
+
+              <TextInput
+                accessibilityLabel="Task description"
+                autoCapitalize="sentences"
+                multiline
+                maxLength={MAX_DESCRIPTION_LENGTH}
+                onChangeText={setDescription}
+                placeholder="Add any context or details that will help you complete it..."
+                placeholderTextColor={createTaskStyles.placeholder.color}
+                style={[
+                  createTaskStyles.input,
+                  createTaskStyles.descriptionInput,
+                ]}
+                textAlignVertical="top"
+                value={description}
+              />
+
+              <Text style={createTaskStyles.characterCount}>
+                {description.length}/{MAX_DESCRIPTION_LENGTH}
+              </Text>
             </View>
 
             {/* Deadline */}
@@ -295,18 +407,8 @@ export default function CreateTaskScreen() {
                 <Text style={createTaskStyles.selectChevron}>›</Text>
               </Pressable>
 
-              <Text style={createTaskStyles.helperText}>
-                Your deadline is used as the source of truth for scheduling and
-                notifications.
-              </Text>
-
               {error === "deadline" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Select a deadline.
-                </Text>
+                <Text style={createTaskStyles.error}>Select a deadline.</Text>
               )}
             </View>
 
@@ -342,20 +444,6 @@ export default function CreateTaskScreen() {
 
                 <Text style={createTaskStyles.selectChevron}>›</Text>
               </Pressable>
-
-              <Text style={createTaskStyles.helperText}>
-                Priority helps determine how often Task Library should remind
-                you.
-              </Text>
-
-              {error === "priority" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Select a priority.
-                </Text>
-              )}
             </View>
 
             {/* Available time */}
@@ -386,24 +474,130 @@ export default function CreateTaskScreen() {
                 >
                   {availableTimeOptions.find(
                     (option) => option.value === availableTime,
-                  )?.label ?? "Select available time"}
+                  )?.label ?? "How much time can you give this?"}
                 </Text>
 
                 <Text style={createTaskStyles.selectChevron}>›</Text>
               </Pressable>
 
-              <Text style={createTaskStyles.helperText}>
-                This helps AI estimate and organize your work sessions.
-              </Text>
-
               {error === "availableTime" && (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  style={createTaskStyles.error}
-                >
-                  Select how much time you have available.
+                <Text style={createTaskStyles.error}>
+                  Select your available time.
                 </Text>
               )}
+            </View>
+
+            {/* Steps */}
+            <View style={createTaskStyles.stepsSection}>
+              <View style={createTaskStyles.stepsHeader}>
+                <View style={createTaskStyles.stepsHeading}>
+                  <Text style={createTaskStyles.label}>Steps</Text>
+
+                  <Text style={createTaskStyles.helperText}>
+                    Break the task into actions you can complete.
+                  </Text>
+                </View>
+
+                <Text style={createTaskStyles.stepCount}>{steps.length}</Text>
+              </View>
+
+              {steps.map((step, index) => (
+                <View key={step.id} style={createTaskStyles.stepCard}>
+                  <View style={createTaskStyles.stepCardHeader}>
+                    <Text style={createTaskStyles.stepNumber}>{index + 1}</Text>
+
+                    {steps.length > 1 && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Remove step ${index + 1}`}
+                        onPress={() => removeStep(step.id)}
+                      >
+                        <Text style={createTaskStyles.removeStepText}>
+                          Remove
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+
+                  <TextInput
+                    accessibilityLabel={`Step ${index + 1} title`}
+                    autoCapitalize="sentences"
+                    maxLength={MAX_STEP_TITLE_LENGTH}
+                    onChangeText={(value) =>
+                      updateStep(step.id, {
+                        title: value,
+                      })
+                    }
+                    placeholder="Step title"
+                    placeholderTextColor={createTaskStyles.placeholder.color}
+                    style={createTaskStyles.input}
+                    value={step.title}
+                  />
+
+                  <TextInput
+                    accessibilityLabel={`Step ${index + 1} description`}
+                    autoCapitalize="sentences"
+                    multiline
+                    maxLength={MAX_STEP_DESCRIPTION_LENGTH}
+                    onChangeText={(value) =>
+                      updateStep(step.id, {
+                        description: value,
+                      })
+                    }
+                    placeholder="What needs to be done?"
+                    placeholderTextColor={createTaskStyles.placeholder.color}
+                    style={[
+                      createTaskStyles.input,
+                      createTaskStyles.stepDescriptionInput,
+                    ]}
+                    textAlignVertical="top"
+                    value={step.description}
+                  />
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select duration for step ${index + 1}`}
+                    onPress={() => {
+                      setDurationStepId(step.id);
+                      setOpenSelect("duration");
+                    }}
+                    style={({ pressed }) => [
+                      createTaskStyles.selectButton,
+                      pressed && createTaskStyles.selectButtonPressed,
+                    ]}
+                  >
+                    <Text style={createTaskStyles.selectText}>
+                      {
+                        durationOptions.find(
+                          (option) => option.value === step.durationMinutes,
+                        )?.label
+                      }
+                    </Text>
+
+                    <Text style={createTaskStyles.selectChevron}>›</Text>
+                  </Pressable>
+                </View>
+              ))}
+
+              {error === "steps" && (
+                <Text style={createTaskStyles.error}>
+                  Add at least one step with a title.
+                </Text>
+              )}
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add another step"
+                onPress={addStep}
+                style={({ pressed }) => [
+                  createTaskStyles.addStepButton,
+                  pressed && createTaskStyles.selectButtonPressed,
+                ]}
+              >
+                <Text style={createTaskStyles.addStepText}>
+                  + Add another step
+                </Text>
+              </Pressable>
             </View>
           </View>
 
@@ -415,26 +609,32 @@ export default function CreateTaskScreen() {
               pressed && createTaskStyles.buttonPressed,
             ]}
           >
-            <Text style={createTaskStyles.submitText}>Create Plan</Text>
+            <Text style={createTaskStyles.submitText}>Create Task</Text>
           </Pressable>
 
           <Text style={createTaskStyles.submitHint}>
-            AI will use your goal, deadline, priority, and available time to
-            build your plan.
+            You can schedule the task and manage it from Task Details after
+            creation.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Priority / available time modal */}
+      {/* Selection modal */}
       <Modal
         animationType="slide"
         transparent
         visible={openSelect !== null}
-        onRequestClose={() => setOpenSelect(null)}
+        onRequestClose={() => {
+          setOpenSelect(null);
+          setDurationStepId(null);
+        }}
       >
         <Pressable
           style={createTaskStyles.modalOverlay}
-          onPress={() => setOpenSelect(null)}
+          onPress={() => {
+            setOpenSelect(null);
+            setDurationStepId(null);
+          }}
         >
           <Pressable
             style={createTaskStyles.optionSheet}
@@ -447,16 +647,21 @@ export default function CreateTaskScreen() {
 
               return (
                 <Pressable
-                  key={option.value}
+                  key={String(option.value)}
                   onPress={() => {
                     if (openSelect === "priority") {
                       setPriority(option.value as TaskPriority);
-                    } else {
+                    } else if (openSelect === "availableTime") {
                       setAvailableTime(option.value as AvailableTime);
+                    } else if (openSelect === "duration" && durationStepId) {
+                      updateStep(durationStepId, {
+                        durationMinutes: option.value as number,
+                      });
                     }
 
                     setError("");
                     setOpenSelect(null);
+                    setDurationStepId(null);
                   }}
                   style={({ pressed }) => [
                     createTaskStyles.option,
@@ -483,7 +688,7 @@ export default function CreateTaskScreen() {
         </Pressable>
       </Modal>
 
-      {/* Deadline calendar modal */}
+      {/* Deadline calendar */}
       <Modal
         animationType="slide"
         transparent
@@ -585,19 +790,15 @@ export default function CreateTaskScreen() {
                 }
 
                 const disabled = startOfDay(date) < today;
+
                 const selected = deadline ? isSameDay(date, deadline) : false;
+
                 const isToday = isSameDay(date, today);
 
                 return (
                   <Pressable
                     key={date.toISOString()}
                     accessibilityRole="button"
-                    accessibilityLabel={date.toLocaleDateString(undefined, {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
                     disabled={disabled}
                     onPress={() => handleSelectDeadline(date)}
                     style={({ pressed }) => [
