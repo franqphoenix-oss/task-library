@@ -88,8 +88,16 @@ export default function HomeScreen() {
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   const nextTask =
-    tasks.find((task) => task.status === "in-progress") ??
-    tasks.find((task) => task.status === "upcoming");
+    tasks.find(
+      (task) =>
+        task.status === "in-progress" &&
+        (task.stage === "active" || task.stage === "scheduled"),
+    ) ??
+    tasks.find(
+      (task) =>
+        task.status === "upcoming" &&
+        (task.stage === "scheduled" || task.stage === "planned"),
+    );
 
   const nextTaskProgress = nextTask ? getTaskProgress(nextTask) : 0;
 

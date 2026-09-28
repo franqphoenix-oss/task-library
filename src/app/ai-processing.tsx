@@ -13,7 +13,8 @@ import {
 
 export default function AiProcessingScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
-  const { getTaskById, attachPlan } = useTasks();
+
+  const { getTaskById, attachPlan, setTaskStage } = useTasks();
 
   useEffect(() => {
     if (!taskId) {
@@ -28,10 +29,13 @@ export default function AiProcessingScreen() {
       return;
     }
 
+    setTaskStage(task.id, "planning");
+
     const timeout = setTimeout(() => {
       const generatedPlan = createMockTaskPlan(task);
 
       if (!validateGeneratedTaskPlan(generatedPlan)) {
+        setTaskStage(task.id, "created");
         router.replace("/home");
         return;
       }
@@ -47,7 +51,7 @@ export default function AiProcessingScreen() {
     }, 1400);
 
     return () => clearTimeout(timeout);
-  }, [attachPlan, getTaskById, taskId]);
+  }, [attachPlan, getTaskById, setTaskStage, taskId]);
 
   return (
     <SafeAreaView style={aiProcessingStyles.safeArea}>
@@ -55,7 +59,9 @@ export default function AiProcessingScreen() {
         <View style={aiProcessingStyles.indicator}>
           <View style={aiProcessingStyles.indicatorDot} />
         </View>
+
         <Text style={aiProcessingStyles.title}>Building your plan</Text>
+
         <Text style={aiProcessingStyles.subtitle}>
           Task Library is breaking your task into practical steps.
         </Text>

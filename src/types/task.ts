@@ -1,5 +1,13 @@
 export type TaskStatus = "upcoming" | "in-progress" | "completed";
 
+export type TaskStage =
+  | "created"
+  | "planning"
+  | "planned"
+  | "scheduled"
+  | "active"
+  | "completed";
+
 export type TaskPriority = "low" | "medium" | "high";
 
 export type AvailableTime = "15-30" | "30-60" | "60-120" | "120-240" | "240+";
@@ -40,7 +48,17 @@ export type TaskPlan = {
 export type Task = TaskInput & {
   id: string;
   createdAt: string;
+
+  /*
+   * status is the user's current task state.
+   * stage describes where the task is in the Task Library lifecycle.
+   */
   status: TaskStatus;
+  stage: TaskStage;
+
   plan?: TaskPlan;
+
+  scheduledAt?: string;
+  startedAt?: string;
   completedAt?: string;
 };

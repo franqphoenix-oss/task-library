@@ -13,22 +13,41 @@ import type {
   Subtask,
   Task,
   TaskInput,
+  TaskStage,
+  TaskStatus,
 } from "../types/task";
 
 import { normalizeTaskPlan } from "@/services/taskPlanner";
 
 type TaskContextValue = {
   tasks: Task[];
+
   createTask: (input: TaskInput) => Task;
+
   updateTask: (taskId: string, updates: Partial<Task>) => void;
+
   deleteTask: (taskId: string) => void;
+
   getTaskById: (taskId: string) => Task | undefined;
+
   attachPlan: (taskId: string, generatedPlan: GeneratedTaskPlan) => void;
+
+  setTaskStage: (taskId: string, stage: TaskStage) => void;
+
+  setTaskStatus: (taskId: string, status: TaskStatus) => void;
+
+  scheduleTask: (taskId: string, scheduledAt: string) => void;
+
+  startTask: (taskId: string) => void;
+
   updateSubtask: (
     taskId: string,
     subtaskId: string,
     updates: Partial<Subtask>,
   ) => void;
+
+  completeSubtask: (taskId: string, subtaskId: string) => void;
+
   completeTask: (taskId: string) => void;
 };
 
@@ -39,7 +58,12 @@ type TaskProviderProps = {
 };
 
 export function TaskProvider({ children }: TaskProviderProps) {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>(
+    mockTasks.map((task) => ({
+      ...task,
+      stage: task.stage ?? "created",
+    })),
+  );
 
   const createTask = useCallback((input: TaskInput) => {
     const task: Task = {
@@ -47,6 +71,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
       ...input,
       createdAt: new Date().toISOString(),
       status: "upcoming",
+      stage: "created",
     };
 
     setTasks((currentTasks) => [...currentTasks, task]);
@@ -81,6 +106,8 @@ export function TaskProvider({ children }: TaskProviderProps) {
             ? {
                 ...task,
                 plan: normalizeTaskPlan(task, generatedPlan),
+                stage: "planned",
+                status: "upcoming",
               }
             : task,
         ),
@@ -88,6 +115,64 @@ export function TaskProvider({ children }: TaskProviderProps) {
     },
     [],
   );
+
+  const setTaskStage = useCallback((taskId: string, stage: TaskStage) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              stage,
+            }
+          : task,
+      ),
+    );
+  }, []);
+
+  const setTaskStatus = useCallback((taskId: string, status: TaskStatus) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              status,
+            }
+          : task,
+      ),
+    );
+  }, []);
+
+  const scheduleTask = useCallback((taskId: string, scheduledAt: string) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              scheduledAt,
+              stage: "scheduled",
+              status: "upcoming",
+            }
+          : task,
+      ),
+    );
+  }, []);
+
+  const startTask = useCallback((taskId: string) => {
+    const startedAt = new Date().toISOString();
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              startedAt,
+              stage: "active",
+              status: "in-progress",
+            }
+          : task,
+      ),
+    );
+  }, []);
 
   const updateSubtask = useCallback(
     (taskId: string, subtaskId: string, updates: Partial<Subtask>) => {
@@ -112,6 +197,50 @@ export function TaskProvider({ children }: TaskProviderProps) {
     [],
   );
 
+  const completeSubtask = useCallback((taskId: string, subtaskId: string) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => {
+        if (task.id !== taskId || !task.plan) {
+          return task;
+        }
+
+        const completedAt = new Date().toISOString();
+
+        const subtasks = task.plan.subtasks.map((subtask) =>
+          subtask.id === subtaskId
+            ? {
+                ...subtask,
+                status: "completed" as const,
+                completedAt,
+              }
+            : subtask,
+        );
+
+        const allCompleted =
+          subtasks.length > 0 &&
+          subtasks.every((subtask) => subtask.status === "completed");
+
+        return {
+          ...task,
+          plan: {
+            ...task.plan,
+            subtasks,
+          },
+          ...(allCompleted
+            ? {
+                status: "completed" as const,
+                stage: "completed" as const,
+                completedAt,
+              }
+            : {
+                status: "in-progress" as const,
+                stage: "active" as const,
+              }),
+        };
+      }),
+    );
+  }, []);
+
   const completeTask = useCallback((taskId: string) => {
     const completedAt = new Date().toISOString();
 
@@ -121,6 +250,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
           ? {
               ...task,
               status: "completed",
+              stage: "completed",
               completedAt,
             }
           : task,
@@ -136,7 +266,12 @@ export function TaskProvider({ children }: TaskProviderProps) {
       deleteTask,
       getTaskById,
       attachPlan,
+      setTaskStage,
+      setTaskStatus,
+      scheduleTask,
+      startTask,
       updateSubtask,
+      completeSubtask,
       completeTask,
     }),
     [
@@ -146,7 +281,12 @@ export function TaskProvider({ children }: TaskProviderProps) {
       deleteTask,
       getTaskById,
       attachPlan,
+      setTaskStage,
+      setTaskStatus,
+      scheduleTask,
+      startTask,
       updateSubtask,
+      completeSubtask,
       completeTask,
     ],
   );
@@ -158,7 +298,7 @@ export function useTasks() {
   const context = useContext(TaskContext);
 
   if (!context) {
-    throw new Error("useTasks must be used inside a TaskProvider");
+    throw new Error("useTasks must be used inside TaskProvider");
   }
 
   return context;
