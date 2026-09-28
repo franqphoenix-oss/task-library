@@ -143,13 +143,6 @@ export const createTaskStyles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
 
-  datePicker: {
-    position: "absolute",
-    width: 1,
-    height: 1,
-    opacity: 0,
-  },
-
   inputInvalid: {
     borderColor: colors.danger,
   },
@@ -243,5 +236,140 @@ export const createTaskStyles = StyleSheet.create({
     color: colors.accent,
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
+  },
+
+  calendarSheet: {
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+
+  calendarHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.lg,
+  },
+
+  calendarTitle: {
+    color: colors.text,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+  },
+
+  calendarCloseButton: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.sm,
+    backgroundColor: colors.surfaceElevated,
+  },
+
+  calendarCloseText: {
+    color: colors.textSecondary,
+    fontSize: 22,
+    lineHeight: 22,
+  },
+
+  calendarMonthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.lg,
+  },
+
+  calendarMonth: {
+    color: colors.text,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+  },
+
+  monthButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.sm,
+    backgroundColor: colors.surfaceElevated,
+  },
+
+  monthButtonText: {
+    color: colors.text,
+    fontSize: 22,
+    lineHeight: 22,
+  },
+
+  weekdayRow: {
+    flexDirection: "row",
+    marginBottom: spacing.sm,
+  },
+
+  weekdayText: {
+    flex: 1,
+    textAlign: "center",
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: typography.weights.medium,
+  },
+
+  calendarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+
+  calendarDay: {
+    width: "14.2857%",
+    aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.sm,
+  },
+
+  calendarDayPressed: {
+    backgroundColor: colors.surfaceElevated,
+  },
+
+  calendarDayToday: {
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+
+  calendarDaySelected: {
+    backgroundColor: colors.accent,
+    borderWidth: 0,
+  },
+
+  calendarDayText: {
+    color: colors.text,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+
+  calendarDayDisabled: {
+    color: colors.textMuted,
+    opacity: 0.35,
+  },
+
+  calendarDayTodayText: {
+    color: colors.accent,
+    fontWeight: typography.weights.semibold,
+  },
+
+  calendarDaySelectedText: {
+    color: colors.white,
+    fontWeight: typography.weights.semibold,
+  },
+
+  calendarHint: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    textAlign: "center",
+    marginTop: spacing.lg,
   },
 });

@@ -1,6 +1,5 @@
-import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -24,49 +23,37 @@ const priorityOptions: {
   label: string;
   value: TaskPriority;
 }[] = [
-  {
-    label: "Low",
-    value: "low",
-  },
-  {
-    label: "Medium",
-    value: "medium",
-  },
-  {
-    label: "High",
-    value: "high",
-  },
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" },
 ];
 
 const availableTimeOptions: {
   label: string;
   value: AvailableTime;
 }[] = [
-  {
-    label: "15–30 minutes",
-    value: "15-30",
-  },
-  {
-    label: "30–60 minutes",
-    value: "30-60",
-  },
-  {
-    label: "1–2 hours",
-    value: "60-120",
-  },
-  {
-    label: "2–4 hours",
-    value: "120-240",
-  },
-  {
-    label: "4+ hours",
-    value: "240+",
-  },
+  { label: "15–30 minutes", value: "15-30" },
+  { label: "30–60 minutes", value: "30-60" },
+  { label: "1–2 hours", value: "60-120" },
+  { label: "2–4 hours", value: "120-240" },
+  { label: "4+ hours", value: "240+" },
 ];
 
 type RequiredField = "goal" | "deadline" | "priority" | "availableTime";
 
 type SelectType = "priority" | "availableTime" | null;
+
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function startOfDay(date: Date) {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+function isSameDay(first: Date, second: Date) {
+  return startOfDay(first).getTime() === startOfDay(second).getTime();
+}
 
 function formatDeadline(date: Date) {
   return date.toLocaleDateString(undefined, {
@@ -77,8 +64,40 @@ function formatDeadline(date: Date) {
   });
 }
 
+function formatMonth(date: Date) {
+  return date.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getMonthDays(monthDate: Date) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  // Convert Sunday = 0 into Monday = 0.
+  const firstWeekday = (firstDay.getDay() + 6) % 7;
+
+  const days: (Date | null)[] = [];
+
+  for (let index = 0; index < firstWeekday; index += 1) {
+    days.push(null);
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day += 1) {
+    days.push(new Date(year, month, day));
+  }
+
+  return days;
+}
+
 export default function CreateTaskScreen() {
   const { createTask } = useTasks();
+
+  const today = useMemo(() => startOfDay(new Date()), []);
 
   const [goal, setGoal] = useState("");
   const [deadline, setDeadline] = useState<Date | null>(null);
@@ -87,10 +106,41 @@ export default function CreateTaskScreen() {
     null,
   );
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [openSelect, setOpenSelect] = useState<SelectType>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1),
+  );
 
   const [error, setError] = useState<RequiredField | "">("");
+
+  const monthDays = useMemo(() => getMonthDays(calendarMonth), [calendarMonth]);
+
+  const handleOpenDeadline = () => {
+    setCalendarMonth(
+      deadline
+        ? new Date(deadline.getFullYear(), deadline.getMonth(), 1)
+        : new Date(today.getFullYear(), today.getMonth(), 1),
+    );
+
+    setShowDatePicker(true);
+
+    if (error === "deadline") {
+      setError("");
+    }
+  };
+
+  const handleSelectDeadline = (date: Date) => {
+    const selectedDate = startOfDay(date);
+
+    if (selectedDate < today) {
+      return;
+    }
+
+    setDeadline(selectedDate);
+    setShowDatePicker(false);
+    setError("");
+  };
 
   const handleSubmit = () => {
     if (!goal.trim()) {
@@ -226,13 +276,7 @@ export default function CreateTaskScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Select deadline"
-                onPress={() => {
-                  setShowDatePicker(true);
-
-                  if (error === "deadline") {
-                    setError("");
-                  }
-                }}
+                onPress={handleOpenDeadline}
                 style={({ pressed }) => [
                   createTaskStyles.selectButton,
                   error === "deadline" && createTaskStyles.inputInvalid,
@@ -250,27 +294,6 @@ export default function CreateTaskScreen() {
 
                 <Text style={createTaskStyles.selectChevron}>›</Text>
               </Pressable>
-
-              {showDatePicker && (
-                <View style={createTaskStyles.datePicker}>
-                  <DateTimePicker
-                    value={deadline ?? new Date()}
-                    mode="date"
-                    minimumDate={new Date()}
-                    presentation="dialog"
-                    onValueChange={(_, selectedDate) => {
-                      if (selectedDate) {
-                        setDeadline(selectedDate);
-                        setShowDatePicker(false);
-                        setError("");
-                      }
-                    }}
-                    onDismiss={() => {
-                      setShowDatePicker(false);
-                    }}
-                  />
-                </View>
-              )}
 
               <Text style={createTaskStyles.helperText}>
                 Your deadline is used as the source of truth for scheduling and
@@ -402,6 +425,7 @@ export default function CreateTaskScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Priority / available time modal */}
       <Modal
         animationType="slide"
         transparent
@@ -427,12 +451,11 @@ export default function CreateTaskScreen() {
                   onPress={() => {
                     if (openSelect === "priority") {
                       setPriority(option.value as TaskPriority);
-                      setError("");
                     } else {
                       setAvailableTime(option.value as AvailableTime);
-                      setError("");
                     }
 
+                    setError("");
                     setOpenSelect(null);
                   }}
                   style={({ pressed }) => [
@@ -456,6 +479,154 @@ export default function CreateTaskScreen() {
                 </Pressable>
               );
             })}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Deadline calendar modal */}
+      <Modal
+        animationType="slide"
+        transparent
+        visible={showDatePicker}
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <Pressable
+          style={createTaskStyles.modalOverlay}
+          onPress={() => setShowDatePicker(false)}
+        >
+          <Pressable
+            style={createTaskStyles.calendarSheet}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <View style={createTaskStyles.calendarHeader}>
+              <Text style={createTaskStyles.calendarTitle}>
+                Select deadline
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close deadline calendar"
+                onPress={() => setShowDatePicker(false)}
+                style={createTaskStyles.calendarCloseButton}
+              >
+                <Text style={createTaskStyles.calendarCloseText}>×</Text>
+              </Pressable>
+            </View>
+
+            <View style={createTaskStyles.calendarMonthHeader}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Previous month"
+                disabled={
+                  calendarMonth.getFullYear() === today.getFullYear() &&
+                  calendarMonth.getMonth() === today.getMonth()
+                }
+                onPress={() => {
+                  setCalendarMonth(
+                    (current) =>
+                      new Date(
+                        current.getFullYear(),
+                        current.getMonth() - 1,
+                        1,
+                      ),
+                  );
+                }}
+                style={({ pressed }) => [
+                  createTaskStyles.monthButton,
+                  pressed && createTaskStyles.buttonPressed,
+                ]}
+              >
+                <Text style={createTaskStyles.monthButtonText}>‹</Text>
+              </Pressable>
+
+              <Text style={createTaskStyles.calendarMonth}>
+                {formatMonth(calendarMonth)}
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Next month"
+                onPress={() => {
+                  setCalendarMonth(
+                    (current) =>
+                      new Date(
+                        current.getFullYear(),
+                        current.getMonth() + 1,
+                        1,
+                      ),
+                  );
+                }}
+                style={({ pressed }) => [
+                  createTaskStyles.monthButton,
+                  pressed && createTaskStyles.buttonPressed,
+                ]}
+              >
+                <Text style={createTaskStyles.monthButtonText}>›</Text>
+              </Pressable>
+            </View>
+
+            <View style={createTaskStyles.weekdayRow}>
+              {WEEK_DAYS.map((day) => (
+                <Text key={day} style={createTaskStyles.weekdayText}>
+                  {day}
+                </Text>
+              ))}
+            </View>
+
+            <View style={createTaskStyles.calendarGrid}>
+              {monthDays.map((date, index) => {
+                if (!date) {
+                  return (
+                    <View
+                      key={`empty-${index}`}
+                      style={createTaskStyles.calendarDay}
+                    />
+                  );
+                }
+
+                const disabled = startOfDay(date) < today;
+                const selected = deadline ? isSameDay(date, deadline) : false;
+                const isToday = isSameDay(date, today);
+
+                return (
+                  <Pressable
+                    key={date.toISOString()}
+                    accessibilityRole="button"
+                    accessibilityLabel={date.toLocaleDateString(undefined, {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                    disabled={disabled}
+                    onPress={() => handleSelectDeadline(date)}
+                    style={({ pressed }) => [
+                      createTaskStyles.calendarDay,
+                      isToday && createTaskStyles.calendarDayToday,
+                      selected && createTaskStyles.calendarDaySelected,
+                      pressed &&
+                        !disabled &&
+                        createTaskStyles.calendarDayPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        createTaskStyles.calendarDayText,
+                        disabled && createTaskStyles.calendarDayDisabled,
+                        isToday && createTaskStyles.calendarDayTodayText,
+                        selected && createTaskStyles.calendarDaySelectedText,
+                      ]}
+                    >
+                      {date.getDate()}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text style={createTaskStyles.calendarHint}>
+              Choose today or any future date.
+            </Text>
           </Pressable>
         </Pressable>
       </Modal>
