@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -9,6 +10,7 @@ import {
 } from "react";
 
 import { normalizeTaskPlan } from "../services/taskPlanner";
+import { loadTasks, saveTasks } from "../services/taskRepository";
 import type {
   GeneratedTaskPlan,
   ManualSubtaskInput,
@@ -22,6 +24,8 @@ import type {
 
 type TaskContextValue = {
   tasks: Task[];
+
+  isLoading: boolean;
 
   createTask: (input: TaskInput) => Task;
 
@@ -86,6 +90,13 @@ function createManualPlan(task: Task, steps: ManualSubtaskInput[]): TaskPlan {
 
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  /*
+   * This prevents persistence from writing the initial empty state
+   * before the stored tasks have finished loading.
+   */
+  const hasHydrated = useRef(false);
 
   /*
    * Non-rendering helpers can use this ref to access the latest state.
@@ -93,6 +104,45 @@ export function TaskProvider({ children }: TaskProviderProps) {
    */
   const tasksRef = useRef(tasks);
   tasksRef.current = tasks;
+
+  /*
+   * Hydrate the task state once when the provider mounts.
+   */
+  useEffect(() => {
+    let isMounted = true;
+
+    async function hydrateTasks() {
+      const persistedTasks = await loadTasks();
+
+      if (!isMounted) {
+        return;
+      }
+
+      setTasks(persistedTasks);
+      hasHydrated.current = true;
+      setIsLoading(false);
+    }
+
+    void hydrateTasks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  /*
+   * Persist every state change after hydration has completed.
+   *
+   * This means all existing task mutations automatically become
+   * persistent without putting storage logic inside each mutation.
+   */
+  useEffect(() => {
+    if (!hasHydrated.current) {
+      return;
+    }
+
+    void saveTasks(tasks);
+  }, [tasks]);
 
   const createTask = useCallback((input: TaskInput) => {
     const task: Task = {
@@ -283,6 +333,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
   const value = useMemo<TaskContextValue>(
     () => ({
       tasks,
+      isLoading,
       createTask,
       createManualTask,
       updateTask,
@@ -299,6 +350,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
     }),
     [
       tasks,
+      isLoading,
       createTask,
       createManualTask,
       updateTask,
