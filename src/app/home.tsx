@@ -9,12 +9,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
 
 import { homeStyles } from "@/features/home/home.styles";
-
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomNav } from "../components/navigation/BottomNav";
 
 const dates = [
   { day: "Mon", date: "21" },
@@ -26,10 +24,41 @@ const dates = [
   { day: "Sun", date: "27" },
 ];
 
+function formatDeadline(deadline: string) {
+  const date = new Date(deadline);
+
+  if (Number.isNaN(date.getTime())) {
+    return "No deadline";
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function getTaskProgress(task: {
+  plan?: {
+    subtasks: {
+      status: "pending" | "in-progress" | "completed";
+    }[];
+  };
+}) {
+  if (!task.plan || task.plan.subtasks.length === 0) {
+    return 0;
+  }
+
+  const completed = task.plan.subtasks.filter(
+    (subtask) => subtask.status === "completed",
+  ).length;
+
+  return Math.round((completed / task.plan.subtasks.length) * 100);
+}
+
 export default function HomeScreen() {
   const { tasks } = useTasks();
-  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
+
   const [selectedDate, setSelectedDate] = useState("24");
 
   const horizontalPadding = 32;
@@ -49,20 +78,11 @@ export default function HomeScreen() {
   const progressPercentage =
     totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
-  const nextTask = tasks.find((task) => task.status !== "completed");
+  const nextTask =
+    tasks.find((task) => task.status === "in-progress") ??
+    tasks.find((task) => task.status === "upcoming");
 
-  const getDeadlineLabel = (deadline: string) => {
-    const date = new Date(deadline);
-
-    if (Number.isNaN(date.getTime())) {
-      return "No deadline";
-    }
-
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const nextTaskProgress = nextTask ? getTaskProgress(nextTask) : 0;
 
   return (
     <SafeAreaView style={homeStyles.safeArea} edges={["top"]}>
@@ -75,6 +95,7 @@ export default function HomeScreen() {
           <View style={homeStyles.header}>
             <View>
               <Text style={homeStyles.greeting}>Good morning, Alex 👋</Text>
+
               <Text style={homeStyles.dateText}>Thu, 24 Apr 2025</Text>
             </View>
 
@@ -100,7 +121,9 @@ export default function HomeScreen() {
                   key={item.date}
                   style={[
                     homeStyles.dateItem,
-                    { width: dateItemWidth },
+                    {
+                      width: dateItemWidth,
+                    },
                     active && homeStyles.dateItemActive,
                   ]}
                   onPress={() => setSelectedDate(item.date)}
@@ -128,53 +151,58 @@ export default function HomeScreen() {
           </ScrollView>
 
           {/* Next up */}
-          {nextTask ? (
-            <View style={homeStyles.nextUpCard}>
-              <View style={homeStyles.nextUpHeader}>
-                <Text style={homeStyles.sectionLabel}>NEXT UP</Text>
+          <View style={homeStyles.nextUpCard}>
+            <View style={homeStyles.nextUpHeader}>
+              <View style={homeStyles.nextUpTitleRow}>
+                <View style={homeStyles.nextUpDot} />
 
-                <Text style={homeStyles.nextUpPriority}>
-                  {nextTask.priority.toUpperCase()}
+                <Text style={homeStyles.nextUpLabel}>Next up</Text>
+              </View>
+
+              <Text style={homeStyles.moreIcon}>⋮</Text>
+            </View>
+
+            <Text style={homeStyles.taskTitle} numberOfLines={2}>
+              {nextTask?.goal || "No tasks scheduled"}
+            </Text>
+
+            <Text style={homeStyles.taskTime}>
+              {nextTask
+                ? `Deadline · ${formatDeadline(nextTask.deadline)}`
+                : "You're all caught up"}
+            </Text>
+
+            <View style={homeStyles.taskBottomRow}>
+              <View style={homeStyles.taskStatus}>
+                <Text style={homeStyles.checkText}>
+                  {nextTask?.status === "completed" ? "✓" : ""}
                 </Text>
               </View>
 
-              <Text style={homeStyles.nextUpTitle} numberOfLines={2}>
-                {nextTask.goal}
-              </Text>
-
-              <View style={homeStyles.nextUpMeta}>
-                <Text style={homeStyles.nextUpMetaText}>
-                  Deadline · {getDeadlineLabel(nextTask.deadline)}
-                </Text>
-
-                {nextTask.plan && (
-                  <Text style={homeStyles.nextUpMetaText}>
+              <View style={homeStyles.taskProgressTrack}>
+                <View
+                  style={[
+                    homeStyles.taskProgressFill,
                     {
-                      nextTask.plan.subtasks.filter(
-                        (subtask) => subtask.status === "completed",
-                      ).length
-                    }{" "}
-                    / {nextTask.plan.subtasks.length} steps
-                  </Text>
-                )}
+                      width: `${nextTaskProgress}%`,
+                    },
+                  ]}
+                />
               </View>
-            </View>
-          ) : (
-            <View style={homeStyles.nextUpCard}>
-              <Text style={homeStyles.sectionLabel}>NEXT UP</Text>
-              <Text style={homeStyles.nextUpTitle}>No active tasks</Text>
-              <Text style={homeStyles.nextUpMetaText}>
-                Create a task to start building your plan.
+
+              <Text style={homeStyles.taskPercentage}>
+                {nextTask ? `${nextTaskProgress}%` : "—"}
               </Text>
             </View>
-          )}
+          </View>
 
           {/* Today's progress */}
           <View style={homeStyles.progressHeader}>
             <Text style={homeStyles.sectionTitle}>Today's progress</Text>
 
             <Text style={homeStyles.progressSummary}>
-              {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
+              {completedTasks} of {totalTasks}{" "}
+              {totalTasks === 1 ? "task" : "tasks"}
             </Text>
           </View>
 
@@ -200,38 +228,41 @@ export default function HomeScreen() {
             <Text style={homeStyles.sectionTitle}>Today's schedule</Text>
 
             <View style={homeStyles.scheduleCard}>
-              {tasks.every((task) => task.status === "completed") ? (
+              {tasks.length === 0 ? (
                 <View style={homeStyles.scheduleItem}>
-                  <Text style={homeStyles.scheduleEmpty}>
+                  <Text style={homeStyles.scheduleTitle}>
                     No tasks scheduled
                   </Text>
                 </View>
               ) : (
-                tasks
-                  .filter((task) => task.status !== "completed")
-                  .map((task, index, activeTasks) => (
+                tasks.map((task, index) => {
+                  const completed = task.status === "completed";
+
+                  return (
                     <View
                       key={task.id}
                       style={[
                         homeStyles.scheduleItem,
-                        index !== activeTasks.length - 1 &&
+                        index !== tasks.length - 1 &&
                           homeStyles.scheduleItemSpacing,
                       ]}
                     >
-                      <View style={homeStyles.scheduleContent}>
-                        <Text
-                          style={homeStyles.scheduleTitle}
-                          numberOfLines={1}
-                        >
-                          {task.goal}
-                        </Text>
+                      <Text style={homeStyles.scheduleTime}>
+                        {formatDeadline(task.deadline)}
+                      </Text>
 
-                        <Text style={homeStyles.scheduleMeta}>
-                          Deadline · {getDeadlineLabel(task.deadline)}
+                      <View style={homeStyles.scheduleIcon}>
+                        <Text style={homeStyles.scheduleIconText}>
+                          {completed ? "✓" : "•"}
                         </Text>
                       </View>
+
+                      <Text style={homeStyles.scheduleTitle} numberOfLines={1}>
+                        {task.goal}
+                      </Text>
                     </View>
-                  ))
+                  );
+                })
               )}
             </View>
           </View>
@@ -241,13 +272,15 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [
             homeStyles.createButton,
-            { width: Math.min(128, screenWidth * 0.36) },
-            { bottom: insets.bottom + 66 },
+            {
+              width: Math.min(128, screenWidth * 0.36),
+            },
             pressed && homeStyles.buttonPressed,
           ]}
           onPress={() => router.push("/create-task")}
         >
           <Text style={homeStyles.createPlus}>+</Text>
+
           <Text style={homeStyles.createText}>Create Task</Text>
         </Pressable>
 

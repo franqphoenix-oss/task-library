@@ -18,14 +18,14 @@ export const createTaskStyles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xxxl,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: spacing.md,
-    marginBottom: spacing.xxl,
+    marginBottom: spacing.xxxl,
   },
 
   backButton: {
@@ -48,14 +48,13 @@ export const createTaskStyles = StyleSheet.create({
     color: colors.text,
     fontSize: typography.sizes.xl,
     fontWeight: typography.weights.semibold,
-    lineHeight: 26,
     marginBottom: spacing.xs,
   },
 
   subtitle: {
     color: colors.textSecondary,
-    fontSize: typography.sizes.sm,
-    lineHeight: 20,
+    fontSize: typography.sizes.xs,
+    lineHeight: 18,
   },
 
   form: {
@@ -66,59 +65,53 @@ export const createTaskStyles = StyleSheet.create({
     gap: spacing.xs,
   },
 
-  labelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
   label: {
     color: colors.text,
-    fontSize: typography.sizes.sm,
+    fontSize: typography.sizes.xs,
     fontWeight: typography.weights.medium,
   },
 
-  required: {
-    color: colors.textMuted,
-    fontSize: typography.sizes.xs,
-  },
-
-  goalInput: {
-    minHeight: 150,
+  input: {
+    minHeight: 48,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     color: colors.text,
     fontSize: typography.sizes.sm,
-    lineHeight: 22,
   },
 
-  helperRow: {
+  goalInput: {
+    minHeight: 132,
+  },
+
+  placeholder: {
+    color: colors.textMuted,
+  },
+
+  characterRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-between",
-    gap: spacing.md,
+    gap: spacing.sm,
   },
 
   helperText: {
     flex: 1,
     color: colors.textMuted,
     fontSize: typography.sizes.xs,
-    lineHeight: 17,
+    lineHeight: 16,
   },
 
   characterCount: {
     color: colors.textMuted,
-    fontSize: typography.sizes.xs,
-    lineHeight: 17,
+    fontSize: 10,
   },
 
   selectButton: {
-    minHeight: 52,
+    minHeight: 48,
     paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
     backgroundColor: colors.surface,
@@ -130,7 +123,6 @@ export const createTaskStyles = StyleSheet.create({
   },
 
   selectText: {
-    flex: 1,
     color: colors.text,
     fontSize: typography.sizes.sm,
   },
@@ -139,28 +131,27 @@ export const createTaskStyles = StyleSheet.create({
     color: colors.textMuted,
   },
 
-  chevron: {
+  selectChevron: {
     color: colors.textSecondary,
-    fontSize: 24,
-    lineHeight: 24,
-    marginLeft: spacing.sm,
+    fontSize: 20,
+    transform: [{ rotate: "180deg" }],
   },
 
-  datePickerContainer: {
+  datePicker: {
     position: "absolute",
     width: 1,
     height: 1,
     opacity: 0,
   },
 
-  pickerContainer: {
-    minHeight: 52,
-    justifyContent: "center",
+  pickerWrapper: {
+    minHeight: 48,
     borderRadius: radius.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: "hidden",
+    justifyContent: "center",
   },
 
   inputInvalid: {
@@ -170,19 +161,15 @@ export const createTaskStyles = StyleSheet.create({
   error: {
     color: colors.danger,
     fontSize: typography.sizes.xs,
-    lineHeight: 17,
-  },
-
-  submitSection: {
-    marginTop: spacing.xxl,
   },
 
   submitButton: {
-    minHeight: 52,
+    minHeight: 50,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
     backgroundColor: colors.accent,
+    marginTop: spacing.xxxl,
   },
 
   submitText: {
@@ -193,15 +180,11 @@ export const createTaskStyles = StyleSheet.create({
 
   submitHint: {
     color: colors.textMuted,
-    fontSize: typography.sizes.xs,
-    lineHeight: 17,
+    fontSize: 10,
+    lineHeight: 15,
     textAlign: "center",
     marginTop: spacing.sm,
     paddingHorizontal: spacing.md,
-  },
-
-  placeholder: {
-    color: colors.textMuted,
   },
 
   buttonPressed: {
