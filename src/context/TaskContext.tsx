@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { mockTasks } from "../data/mockTasks";
+import { normalizeTaskPlan } from "../services/taskPlanner";
 import type {
   GeneratedTaskPlan,
   Subtask,
@@ -17,8 +18,6 @@ import type {
   TaskStage,
   TaskStatus,
 } from "../types/task";
-
-import { normalizeTaskPlan } from "@/services/taskPlanner";
 
 type TaskContextValue = {
   tasks: Task[];
@@ -58,6 +57,14 @@ type TaskProviderProps = {
   children: ReactNode;
 };
 
+function updateTaskById(
+  tasks: Task[],
+  taskId: string,
+  updater: (task: Task) => Task,
+) {
+  return tasks.map((task) => (task.id === taskId ? updater(task) : task));
+}
+
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>(
     mockTasks.map((task) => ({
@@ -66,8 +73,11 @@ export function TaskProvider({ children }: TaskProviderProps) {
     })),
   );
 
+  /*
+   * The ref gives non-rendering helpers access to the latest state.
+   * Rendered screens should read from `tasks` directly whenever possible.
+   */
   const tasksRef = useRef(tasks);
-
   tasksRef.current = tasks;
 
   const createTask = useCallback((input: TaskInput) => {
@@ -86,9 +96,10 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId ? { ...task, ...updates } : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        ...updates,
+      })),
     );
   }, []);
 
@@ -105,16 +116,12 @@ export function TaskProvider({ children }: TaskProviderProps) {
   const attachPlan = useCallback(
     (taskId: string, generatedPlan: GeneratedTaskPlan) => {
       setTasks((currentTasks) =>
-        currentTasks.map((task) =>
-          task.id === taskId
-            ? {
-                ...task,
-                plan: normalizeTaskPlan(task, generatedPlan),
-                stage: "planned",
-                status: "upcoming",
-              }
-            : task,
-        ),
+        updateTaskById(currentTasks, taskId, (task) => ({
+          ...task,
+          plan: normalizeTaskPlan(task, generatedPlan),
+          stage: "planned",
+          status: "upcoming",
+        })),
       );
     },
     [],
@@ -122,42 +129,30 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   const setTaskStage = useCallback((taskId: string, stage: TaskStage) => {
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              stage,
-            }
-          : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        stage,
+      })),
     );
   }, []);
 
   const setTaskStatus = useCallback((taskId: string, status: TaskStatus) => {
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              status,
-            }
-          : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        status,
+      })),
     );
   }, []);
 
   const scheduleTask = useCallback((taskId: string, scheduledAt: string) => {
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              scheduledAt,
-              stage: "scheduled",
-              status: "upcoming",
-            }
-          : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        scheduledAt,
+        stage: "scheduled",
+        status: "upcoming",
+      })),
     );
   }, []);
 
@@ -165,24 +160,20 @@ export function TaskProvider({ children }: TaskProviderProps) {
     const startedAt = new Date().toISOString();
 
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              startedAt,
-              stage: "active",
-              status: "in-progress",
-            }
-          : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        startedAt,
+        stage: "active",
+        status: "in-progress",
+      })),
     );
   }, []);
 
   const updateSubtask = useCallback(
     (taskId: string, subtaskId: string, updates: Partial<Subtask>) => {
       setTasks((currentTasks) =>
-        currentTasks.map((task) => {
-          if (task.id !== taskId || !task.plan) {
+        updateTaskById(currentTasks, taskId, (task) => {
+          if (!task.plan) {
             return task;
           }
 
@@ -191,7 +182,12 @@ export function TaskProvider({ children }: TaskProviderProps) {
             plan: {
               ...task.plan,
               subtasks: task.plan.subtasks.map((subtask) =>
-                subtask.id === subtaskId ? { ...subtask, ...updates } : subtask,
+                subtask.id === subtaskId
+                  ? {
+                      ...subtask,
+                      ...updates,
+                    }
+                  : subtask,
               ),
             },
           };
@@ -202,13 +198,13 @@ export function TaskProvider({ children }: TaskProviderProps) {
   );
 
   const completeSubtask = useCallback((taskId: string, subtaskId: string) => {
+    const completedAt = new Date().toISOString();
+
     setTasks((currentTasks) =>
-      currentTasks.map((task) => {
-        if (task.id !== taskId || !task.plan) {
+      updateTaskById(currentTasks, taskId, (task) => {
+        if (!task.plan || task.status === "completed") {
           return task;
         }
-
-        const completedAt = new Date().toISOString();
 
         const subtasks = task.plan.subtasks.map((subtask) =>
           subtask.id === subtaskId
@@ -226,20 +222,17 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
         return {
           ...task,
+
+          status: allCompleted ? "completed" : "in-progress",
+
+          stage: allCompleted ? "completed" : "active",
+
+          completedAt: allCompleted ? completedAt : task.completedAt,
+
           plan: {
             ...task.plan,
             subtasks,
           },
-          ...(allCompleted
-            ? {
-                status: "completed" as const,
-                stage: "completed" as const,
-                completedAt,
-              }
-            : {
-                status: "in-progress" as const,
-                stage: "active" as const,
-              }),
         };
       }),
     );
@@ -249,16 +242,12 @@ export function TaskProvider({ children }: TaskProviderProps) {
     const completedAt = new Date().toISOString();
 
     setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              status: "completed",
-              stage: "completed",
-              completedAt,
-            }
-          : task,
-      ),
+      updateTaskById(currentTasks, taskId, (task) => ({
+        ...task,
+        status: "completed",
+        stage: "completed",
+        completedAt,
+      })),
     );
   }, []);
 

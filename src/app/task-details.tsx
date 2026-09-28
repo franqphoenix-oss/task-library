@@ -61,14 +61,14 @@ function getStatusLabel(
 export default function TaskDetailsScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
 
-  const { getTaskById, startTask, completeSubtask, completeTask } = useTasks();
+  const { tasks, startTask, completeSubtask, completeTask } = useTasks();
 
   if (!taskId) {
     router.replace("/home");
     return null;
   }
 
-  const task = getTaskById(taskId);
+  const task = tasks.find((item) => item.id === taskId);
 
   if (!task?.plan) {
     router.replace("/home");
@@ -248,12 +248,6 @@ export default function TaskDetailsScreen() {
                   ]}
                   onPress={() => handleCompleteSubtask(subtask.id)}
                   disabled={isSubtaskCompleted || isCompleted}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    isSubtaskCompleted
-                      ? `${subtask.title}, completed`
-                      : `Complete ${subtask.title}`
-                  }
                 >
                   <View
                     style={[
@@ -292,6 +286,14 @@ export default function TaskDetailsScreen() {
                       {subtask.durationMinutes} min
                     </Text>
                   </View>
+
+                  {!isSubtaskCompleted && !isCompleted && (
+                    <View style={taskDetailsStyles.completeIndicator}>
+                      <Text style={taskDetailsStyles.completeIndicatorText}>
+                        ✓
+                      </Text>
+                    </View>
+                  )}
                 </Pressable>
               );
             })}
@@ -321,7 +323,15 @@ export default function TaskDetailsScreen() {
           </Pressable>
         )}
 
-        {isActive && (
+        {isActive && progress < 100 && (
+          <View style={taskDetailsStyles.actionHint}>
+            <Text style={taskDetailsStyles.actionHintText}>
+              Complete each step above to finish this task.
+            </Text>
+          </View>
+        )}
+
+        {isActive && progress === 100 && (
           <Pressable
             style={({ pressed }) => [
               taskDetailsStyles.primaryButton,

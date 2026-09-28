@@ -370,4 +370,33 @@ export const taskDetailsStyles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     lineHeight: 20,
   },
+
+  completeIndicator: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+
+  completeIndicatorText: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.semibold,
+  },
+
+  actionHint: {
+    marginTop: spacing.sm,
+    paddingVertical: spacing.md,
+    alignItems: "center",
+  },
+
+  actionHintText: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    textAlign: "center",
+  },
 });
