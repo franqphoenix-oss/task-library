@@ -18,7 +18,7 @@ export const homeStyles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 82,
+    paddingBottom: 150,
   },
 
   header: {
@@ -336,7 +336,7 @@ export const homeStyles = StyleSheet.create({
   createButton: {
     position: "absolute",
     right: spacing.lg,
-    height: 40,
+    height: 44,
     borderRadius: radius.full,
     backgroundColor: colors.accent,
     flexDirection: "row",
@@ -349,7 +349,6 @@ export const homeStyles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    marginBottom: 10,
   },
 
   createPlus: {

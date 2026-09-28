@@ -1,9 +1,9 @@
-import { Picker } from "@expo/ui";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -66,6 +66,8 @@ const availableTimeOptions: {
 
 type RequiredField = "goal" | "deadline" | "priority" | "availableTime";
 
+type SelectType = "priority" | "availableTime" | null;
+
 function formatDeadline(date: Date) {
   return date.toLocaleDateString(undefined, {
     weekday: "short",
@@ -86,6 +88,7 @@ export default function CreateTaskScreen() {
   );
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [openSelect, setOpenSelect] = useState<SelectType>(null);
 
   const [error, setError] = useState<RequiredField | "">("");
 
@@ -124,6 +127,14 @@ export default function CreateTaskScreen() {
       },
     });
   };
+
+  const selectTitle =
+    openSelect === "priority" ? "Select priority" : "Select available time";
+
+  const selectOptions =
+    openSelect === "priority" ? priorityOptions : availableTimeOptions;
+
+  const selectedValue = openSelect === "priority" ? priority : availableTime;
 
   return (
     <SafeAreaView style={createTaskStyles.safeArea} edges={["top", "bottom"]}>
@@ -222,9 +233,10 @@ export default function CreateTaskScreen() {
                     setError("");
                   }
                 }}
-                style={[
+                style={({ pressed }) => [
                   createTaskStyles.selectButton,
                   error === "deadline" && createTaskStyles.inputInvalid,
+                  pressed && createTaskStyles.selectButtonPressed,
                 ]}
               >
                 <Text
@@ -279,31 +291,34 @@ export default function CreateTaskScreen() {
             <View style={createTaskStyles.field}>
               <Text style={createTaskStyles.label}>Priority</Text>
 
-              <View
-                style={[
-                  createTaskStyles.pickerWrapper,
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Select priority"
+                onPress={() => {
+                  setOpenSelect("priority");
+
+                  if (error === "priority") {
+                    setError("");
+                  }
+                }}
+                style={({ pressed }) => [
+                  createTaskStyles.selectButton,
                   error === "priority" && createTaskStyles.inputInvalid,
+                  pressed && createTaskStyles.selectButtonPressed,
                 ]}
               >
-                <Picker
-                  selectedValue={priority ?? "medium"}
-                  onValueChange={(value) => {
-                    setPriority(value as TaskPriority);
-
-                    if (error === "priority") {
-                      setError("");
-                    }
-                  }}
+                <Text
+                  style={[
+                    createTaskStyles.selectText,
+                    !priority && createTaskStyles.selectPlaceholder,
+                  ]}
                 >
-                  {priorityOptions.map((option) => (
-                    <Picker.Item
-                      key={option.value}
-                      label={option.label}
-                      value={option.value}
-                    />
-                  ))}
-                </Picker>
-              </View>
+                  {priorityOptions.find((option) => option.value === priority)
+                    ?.label ?? "Select priority"}
+                </Text>
+
+                <Text style={createTaskStyles.selectChevron}>›</Text>
+              </Pressable>
 
               <Text style={createTaskStyles.helperText}>
                 Priority helps determine how often Task Library should remind
@@ -324,31 +339,35 @@ export default function CreateTaskScreen() {
             <View style={createTaskStyles.field}>
               <Text style={createTaskStyles.label}>Available time</Text>
 
-              <View
-                style={[
-                  createTaskStyles.pickerWrapper,
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Select available time"
+                onPress={() => {
+                  setOpenSelect("availableTime");
+
+                  if (error === "availableTime") {
+                    setError("");
+                  }
+                }}
+                style={({ pressed }) => [
+                  createTaskStyles.selectButton,
                   error === "availableTime" && createTaskStyles.inputInvalid,
+                  pressed && createTaskStyles.selectButtonPressed,
                 ]}
               >
-                <Picker
-                  selectedValue={availableTime ?? "30-60"}
-                  onValueChange={(value) => {
-                    setAvailableTime(value as AvailableTime);
-
-                    if (error === "availableTime") {
-                      setError("");
-                    }
-                  }}
+                <Text
+                  style={[
+                    createTaskStyles.selectText,
+                    !availableTime && createTaskStyles.selectPlaceholder,
+                  ]}
                 >
-                  {availableTimeOptions.map((option) => (
-                    <Picker.Item
-                      key={option.value}
-                      label={option.label}
-                      value={option.value}
-                    />
-                  ))}
-                </Picker>
-              </View>
+                  {availableTimeOptions.find(
+                    (option) => option.value === availableTime,
+                  )?.label ?? "Select available time"}
+                </Text>
+
+                <Text style={createTaskStyles.selectChevron}>›</Text>
+              </Pressable>
 
               <Text style={createTaskStyles.helperText}>
                 This helps AI estimate and organize your work sessions.
@@ -382,6 +401,64 @@ export default function CreateTaskScreen() {
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        animationType="slide"
+        transparent
+        visible={openSelect !== null}
+        onRequestClose={() => setOpenSelect(null)}
+      >
+        <Pressable
+          style={createTaskStyles.modalOverlay}
+          onPress={() => setOpenSelect(null)}
+        >
+          <Pressable
+            style={createTaskStyles.optionSheet}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={createTaskStyles.optionSheetTitle}>{selectTitle}</Text>
+
+            {selectOptions.map((option) => {
+              const selected = option.value === selectedValue;
+
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => {
+                    if (openSelect === "priority") {
+                      setPriority(option.value as TaskPriority);
+                      setError("");
+                    } else {
+                      setAvailableTime(option.value as AvailableTime);
+                      setError("");
+                    }
+
+                    setOpenSelect(null);
+                  }}
+                  style={({ pressed }) => [
+                    createTaskStyles.option,
+                    selected && createTaskStyles.optionSelected,
+                    pressed && createTaskStyles.optionPressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      createTaskStyles.optionText,
+                      selected && createTaskStyles.optionTextSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+
+                  {selected && (
+                    <Text style={createTaskStyles.optionCheck}>✓</Text>
+                  )}
+                </Pressable>
+              );
+            })}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }

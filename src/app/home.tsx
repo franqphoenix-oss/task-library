@@ -7,7 +7,11 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { spacing } from "../constants/spacing";
 
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
@@ -56,6 +60,11 @@ function getTaskProgress(task: {
 }
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+
+  const bottomNavHeight = 64 + Math.max(insets.bottom, 8);
+  const createButtonBottom = bottomNavHeight + spacing.md;
+
   const { tasks } = useTasks();
   const { width: screenWidth } = useWindowDimensions();
 
@@ -273,7 +282,8 @@ export default function HomeScreen() {
           style={({ pressed }) => [
             homeStyles.createButton,
             {
-              width: Math.min(128, screenWidth * 0.36),
+              width: Math.min(140, screenWidth * 0.38),
+              bottom: createButtonBottom,
             },
             pressed && homeStyles.buttonPressed,
           ]}

@@ -25,7 +25,7 @@ export const createTaskStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: spacing.md,
-    marginBottom: spacing.xxxl,
+    marginBottom: spacing.xxl,
   },
 
   backButton: {
@@ -122,7 +122,12 @@ export const createTaskStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
+  selectButtonPressed: {
+    backgroundColor: colors.surfaceElevated,
+  },
+
   selectText: {
+    flex: 1,
     color: colors.text,
     fontSize: typography.sizes.sm,
   },
@@ -134,7 +139,8 @@ export const createTaskStyles = StyleSheet.create({
   selectChevron: {
     color: colors.textSecondary,
     fontSize: 20,
-    transform: [{ rotate: "180deg" }],
+    lineHeight: 20,
+    marginLeft: spacing.sm,
   },
 
   datePicker: {
@@ -142,16 +148,6 @@ export const createTaskStyles = StyleSheet.create({
     width: 1,
     height: 1,
     opacity: 0,
-  },
-
-  pickerWrapper: {
-    minHeight: 48,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: "hidden",
-    justifyContent: "center",
   },
 
   inputInvalid: {
@@ -169,7 +165,7 @@ export const createTaskStyles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: radius.sm,
     backgroundColor: colors.accent,
-    marginTop: spacing.xxxl,
+    marginTop: spacing.xxl,
   },
 
   submitText: {
@@ -189,5 +185,63 @@ export const createTaskStyles = StyleSheet.create({
 
   buttonPressed: {
     opacity: 0.75,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+  },
+
+  optionSheet: {
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxxl,
+  },
+
+  optionSheetTitle: {
+    color: colors.text,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.md,
+  },
+
+  option: {
+    minHeight: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.sm,
+    marginBottom: spacing.xs,
+  },
+
+  optionPressed: {
+    backgroundColor: colors.surfaceElevated,
+  },
+
+  optionSelected: {
+    backgroundColor: colors.surfaceElevated,
+  },
+
+  optionText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.sm,
+  },
+
+  optionTextSelected: {
+    color: colors.text,
+    fontWeight: typography.weights.semibold,
+  },
+
+  optionCheck: {
+    color: colors.accent,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
   },
 });
