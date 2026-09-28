@@ -241,4 +241,31 @@ export const tasksStyles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
   },
+
+  headerCopy: {
+    flex: 1,
+  },
+
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+
+  calendarButton: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  calendarButtonText: {
+    color: colors.text,
+    fontSize: 19,
+    lineHeight: 20,
+  },
 });

@@ -215,22 +215,36 @@ export default function TasksScreen() {
           ]}
         >
           <View style={tasksStyles.header}>
-            <View>
+            <View style={tasksStyles.headerCopy}>
               <Text style={tasksStyles.eyebrow}>TASKS</Text>
               <Text style={tasksStyles.title}>Your tasks</Text>
             </View>
 
-            <Pressable
-              style={({ pressed }) => [
-                tasksStyles.addButton,
-                pressed && tasksStyles.addButtonPressed,
-              ]}
-              onPress={() => router.push("/create-task")}
-              accessibilityRole="button"
-              accessibilityLabel="Create task"
-            >
-              <Text style={tasksStyles.addButtonText}>+</Text>
-            </Pressable>
+            <View style={tasksStyles.headerActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open calendar"
+                onPress={() => router.push("/calendar")}
+                style={({ pressed }) => [
+                  tasksStyles.calendarButton,
+                  pressed && tasksStyles.addButtonPressed,
+                ]}
+              >
+                <Text style={tasksStyles.calendarButtonText}>▦</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  tasksStyles.addButton,
+                  pressed && tasksStyles.addButtonPressed,
+                ]}
+                onPress={() => router.push("/create-task")}
+                accessibilityRole="button"
+                accessibilityLabel="Create task"
+              >
+                <Text style={tasksStyles.addButtonText}>+</Text>
+              </Pressable>
+            </View>
           </View>
 
           {!hasTasks ? (

@@ -20,7 +20,7 @@ import {
 
 export default function ScheduleTaskScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
-  const { getTaskById, scheduleTask } = useTasks();
+  const { tasks, scheduleTask } = useTasks();
 
   const today = useMemo(() => new Date(), []);
 
@@ -36,7 +36,7 @@ export default function ScheduleTaskScreen() {
     return null;
   }
 
-  const task = getTaskById(taskId);
+  const task = tasks.find((item) => item.id === taskId);
 
   if (!task?.plan) {
     router.replace("/home");
