@@ -14,7 +14,7 @@ export default function SignupScreen() {
             signupStyles.backButton,
             pressed && signupStyles.pressed,
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/welcome")}
         >
           <Text style={signupStyles.backIcon}>‹</Text>
         </Pressable>

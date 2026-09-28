@@ -14,7 +14,7 @@ export default function LoginScreen() {
             loginStyles.backButton,
             pressed && loginStyles.pressed,
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/welcome")}
         >
           <Text style={loginStyles.backIcon}>‹</Text>
         </Pressable>
