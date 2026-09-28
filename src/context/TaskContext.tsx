@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -51,6 +52,17 @@ type TaskContextValue = {
   completeTask: (taskId: string) => void;
 };
 
+const [tasks, setTasks] = useState<Task[]>(
+  mockTasks.map((task) => ({
+    ...task,
+    stage: task.stage ?? "created",
+  })),
+);
+
+const tasksRef = useRef(tasks);
+
+tasksRef.current = tasks;
+
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
 
 type TaskProviderProps = {
@@ -93,10 +105,9 @@ export function TaskProvider({ children }: TaskProviderProps) {
     );
   }, []);
 
-  const getTaskById = useCallback(
-    (taskId: string) => tasks.find((task) => task.id === taskId),
-    [tasks],
-  );
+  const getTaskById = useCallback((taskId: string) => {
+    return tasksRef.current.find((task) => task.id === taskId);
+  }, []);
 
   const attachPlan = useCallback(
     (taskId: string, generatedPlan: GeneratedTaskPlan) => {

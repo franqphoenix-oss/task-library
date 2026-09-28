@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,9 +16,15 @@ export default function AiProcessingScreen() {
 
   const { getTaskById, attachPlan, setTaskStage } = useTasks();
 
+  const hasStartedRef = useRef(false);
+
   useEffect(() => {
     if (!taskId) {
       router.replace("/home");
+      return;
+    }
+
+    if (hasStartedRef.current) {
       return;
     }
 
@@ -28,6 +34,8 @@ export default function AiProcessingScreen() {
       router.replace("/home");
       return;
     }
+
+    hasStartedRef.current = true;
 
     setTaskStage(task.id, "planning");
 
