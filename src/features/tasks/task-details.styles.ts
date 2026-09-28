@@ -34,6 +34,10 @@ export const taskDetailsStyles = StyleSheet.create({
     marginRight: spacing.md,
   },
 
+  buttonPressed: {
+    opacity: 0.75,
+  },
+
   backText: {
     color: colors.text,
     fontSize: 28,
@@ -59,10 +63,38 @@ export const taskDetailsStyles = StyleSheet.create({
     fontWeight: typography.weights.semibold,
   },
 
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: spacing.sm,
+  },
+
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: radius.full,
+    backgroundColor: colors.textMuted,
+    marginRight: spacing.xs,
+  },
+
+  statusDotActive: {
+    backgroundColor: colors.accent,
+  },
+
+  statusDotCompleted: {
+    backgroundColor: colors.success,
+  },
+
+  statusText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
+  },
+
   metaRow: {
     flexDirection: "row",
     gap: spacing.md,
-    marginBottom: spacing.xxl,
+    marginBottom: spacing.lg,
   },
 
   metaCard: {
@@ -85,6 +117,68 @@ export const taskDetailsStyles = StyleSheet.create({
     color: colors.text,
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
+  },
+
+  scheduleCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.xxl,
+  },
+
+  scheduleCopy: {
+    flex: 1,
+  },
+
+  scheduleDate: {
+    color: colors.text,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.xs,
+  },
+
+  scheduleTime: {
+    color: colors.accent,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+
+  progressSection: {
+    marginBottom: spacing.xxl,
+  },
+
+  progressHeader: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginBottom: spacing.md,
+  },
+
+  progressSummary: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    marginTop: spacing.xs,
+  },
+
+  progressPercentage: {
+    color: colors.accent,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+  },
+
+  progressTrack: {
+    height: 7,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceElevated,
+    overflow: "hidden",
+  },
+
+  progressFill: {
+    height: "100%",
+    borderRadius: radius.full,
+    backgroundColor: colors.accent,
   },
 
   section: {
@@ -112,6 +206,18 @@ export const taskDetailsStyles = StyleSheet.create({
     lineHeight: 21,
   },
 
+  stepsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  stepsHint: {
+    color: colors.textMuted,
+    fontSize: typography.sizes.xs,
+    marginBottom: spacing.md,
+  },
+
   stepsCard: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -123,6 +229,15 @@ export const taskDetailsStyles = StyleSheet.create({
   step: {
     flexDirection: "row",
     gap: spacing.md,
+    borderRadius: radius.sm,
+  },
+
+  stepPressed: {
+    opacity: 0.7,
+  },
+
+  stepCompleted: {
+    opacity: 0.7,
   },
 
   stepSpacing: {
@@ -138,10 +253,18 @@ export const taskDetailsStyles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  stepNumberCompleted: {
+    backgroundColor: colors.success,
+  },
+
   stepNumberText: {
     color: colors.accent,
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.bold,
+  },
+
+  stepNumberTextCompleted: {
+    color: colors.white,
   },
 
   stepContent: {
@@ -153,6 +276,11 @@ export const taskDetailsStyles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
     marginBottom: spacing.xs,
+  },
+
+  stepTitleCompleted: {
+    color: colors.textSecondary,
+    textDecorationLine: "line-through",
   },
 
   stepDescription: {
@@ -167,7 +295,29 @@ export const taskDetailsStyles = StyleSheet.create({
     fontSize: typography.sizes.xs,
   },
 
-  scheduleButton: {
+  tipCard: {
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+
+  tipEyebrow: {
+    color: colors.accent,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.xs,
+  },
+
+  tipText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.sm,
+    lineHeight: 20,
+  },
+
+  primaryButton: {
     minHeight: 50,
     borderRadius: radius.sm,
     backgroundColor: colors.accent,
@@ -176,9 +326,48 @@ export const taskDetailsStyles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 
-  scheduleButtonText: {
+  primaryButtonText: {
     color: colors.white,
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
+  },
+
+  secondaryButton: {
+    minHeight: 50,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.sm,
+  },
+
+  secondaryButtonText: {
+    color: colors.text,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+  },
+
+  completedCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.success,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    marginTop: spacing.sm,
+  },
+
+  completedTitle: {
+    color: colors.success,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.xs,
+  },
+
+  completedText: {
+    color: colors.textSecondary,
+    fontSize: typography.sizes.sm,
+    lineHeight: 20,
   },
 });
