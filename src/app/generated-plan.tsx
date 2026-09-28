@@ -7,7 +7,7 @@ import { generatedPlanStyles } from "../features/tasks/generated-plan.styles";
 
 export default function GeneratedPlanScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
-  const { getTaskById, startTask } = useTasks();
+  const { getTaskById } = useTasks();
 
   if (!taskId) {
     router.replace("/home");
@@ -70,12 +70,16 @@ export default function GeneratedPlanScreen() {
         </View>
         <Pressable
           style={generatedPlanStyles.button}
-          onPress={() => {
-            startTask(task.id);
-            router.replace("/home");
-          }}
+          onPress={() =>
+            router.push({
+              pathname: "/task-details",
+              params: {
+                taskId: task.id,
+              },
+            })
+          }
         >
-          <Text style={generatedPlanStyles.buttonText}>Start Task</Text>
+          <Text style={generatedPlanStyles.buttonText}>Review Task</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
