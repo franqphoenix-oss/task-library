@@ -428,26 +428,33 @@ export const createTaskStyles = StyleSheet.create({
 
   removeStepText: {
     color: colors.danger,
-    fontSize: typography.sizes.xs,
-    fontWeight: typography.weights.medium,
+    fontSize: 11,
+    fontWeight: typography.weights.regular,
   },
 
   stepDescriptionInput: {
     minHeight: 80,
   },
 
+  stepDurationButton: {
+    marginTop: spacing.sm,
+  },
+
   addStepButton: {
-    minHeight: 46,
+    minHeight: 44,
+    marginTop: spacing.xs,
     borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: "dashed",
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
   },
 
+  addStepButtonPressed: {
+    opacity: 0.75,
+  },
+
   addStepText: {
-    color: colors.accent,
+    color: colors.white,
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
   },

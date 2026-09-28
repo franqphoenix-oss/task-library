@@ -504,16 +504,19 @@ export default function CreateTaskScreen() {
               {steps.map((step, index) => (
                 <View key={step.id} style={createTaskStyles.stepCard}>
                   <View style={createTaskStyles.stepCardHeader}>
-                    <Text style={createTaskStyles.stepNumber}>{index + 1}</Text>
+                    <Text style={createTaskStyles.stepNumber}>
+                      Step {index + 1}
+                    </Text>
 
                     {steps.length > 1 && (
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Remove step ${index + 1}`}
                         onPress={() => removeStep(step.id)}
+                        hitSlop={8}
                       >
                         <Text style={createTaskStyles.removeStepText}>
-                          Remove
+                          Remove step
                         </Text>
                       </Pressable>
                     )}
@@ -563,6 +566,7 @@ export default function CreateTaskScreen() {
                     }}
                     style={({ pressed }) => [
                       createTaskStyles.selectButton,
+                      createTaskStyles.stepDurationButton,
                       pressed && createTaskStyles.selectButtonPressed,
                     ]}
                   >
@@ -576,6 +580,18 @@ export default function CreateTaskScreen() {
 
                     <Text style={createTaskStyles.selectChevron}>›</Text>
                   </Pressable>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Add step after step ${index + 1}`}
+                    onPress={addStep}
+                    style={({ pressed }) => [
+                      createTaskStyles.addStepButton,
+                      pressed && createTaskStyles.addStepButtonPressed,
+                    ]}
+                  >
+                    <Text style={createTaskStyles.addStepText}>Add step</Text>
+                  </Pressable>
                 </View>
               ))}
 
@@ -584,20 +600,6 @@ export default function CreateTaskScreen() {
                   Add at least one step with a title.
                 </Text>
               )}
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Add another step"
-                onPress={addStep}
-                style={({ pressed }) => [
-                  createTaskStyles.addStepButton,
-                  pressed && createTaskStyles.selectButtonPressed,
-                ]}
-              >
-                <Text style={createTaskStyles.addStepText}>
-                  + Add another step
-                </Text>
-              </Pressable>
             </View>
           </View>
 
