@@ -2,9 +2,10 @@ import { router } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "../constants/colors";
-import { radius, spacing } from "../constants/spacing";
+import { NotificationIcon } from "../components/icons/NotificationIcon";
+import { BottomNav } from "../components/navigation/BottomNav";
 import { useNotifications } from "../context/NotificationContext";
+import { notificationsStyles as styles } from "../features/notifications/notifications.styles";
 
 function formatNotificationTime(value: string) {
   const date = new Date(value);
@@ -13,131 +14,75 @@ function formatNotificationTime(value: string) {
     return "";
   }
 
-  return date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+  const now = new Date();
 
-function getIcon(type: string) {
-  switch (type) {
-    case "task-reminder":
-      return "◷";
-    case "deadline":
-      return "!";
-    case "task-completed":
-      return "✓";
-    case "recommendation":
-      return "✦";
-    default:
-      return "•";
+  const sameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (sameDay) {
+    return date.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
   }
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default function NotificationsScreen() {
   const { notifications, isLoading, markAsRead, markAllAsRead } =
     useNotifications();
 
+  const hasUnread = notifications.some((notification) => !notification.read);
+
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-        }}
-        edges={["top"]}
-      >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: colors.textSecondary }}>
-            Loading notifications...
-          </Text>
+      <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading notifications...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-      }}
-      edges={["top"]}
-    >
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingTop: spacing.lg,
-            paddingBottom: spacing.md,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text
-            style={{
-              color: colors.text,
-              fontSize: 24,
-              fontWeight: "600",
-            }}
-          >
-            Notifications
-          </Text>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Notifications</Text>
 
-          {notifications.some((notification) => !notification.read) && (
-            <Pressable onPress={markAllAsRead}>
-              <Text
-                style={{
-                  color: colors.accent,
-                  fontSize: 13,
-                  fontWeight: "500",
-                }}
-              >
-                Mark all read
-              </Text>
+          {hasUnread ? (
+            <Pressable
+              onPress={markAllAsRead}
+              style={({ pressed }) => [
+                styles.markAllButton,
+                pressed && styles.notificationCardPressed,
+              ]}
+              hitSlop={8}
+            >
+              <Text style={styles.markAllText}>Mark all read</Text>
             </Pressable>
-          )}
+          ) : null}
         </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.lg,
-            paddingBottom: spacing.xxxl,
-          }}
+          contentContainerStyle={styles.list}
         >
           {notifications.length === 0 ? (
-            <View
-              style={{
-                alignItems: "center",
-                paddingTop: spacing.huge,
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.text,
-                  fontSize: 17,
-                  fontWeight: "600",
-                }}
-              >
-                You're all caught up
-              </Text>
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <View style={styles.emptyIconDot} />
+              </View>
 
-              <Text
-                style={{
-                  marginTop: spacing.sm,
-                  color: colors.textSecondary,
-                  fontSize: 14,
-                  textAlign: "center",
-                }}
-              >
+              <Text style={styles.emptyTitle}>You're all caught up</Text>
+
+              <Text style={styles.emptyDescription}>
                 Task reminders and important updates will appear here.
               </Text>
             </View>
@@ -148,87 +93,49 @@ export default function NotificationsScreen() {
                 onPress={() => {
                   markAsRead(notification.id);
 
-                  if (notification.taskId) {
-                    router.push({
-                      pathname: "/task-details",
-                      params: {
-                        taskId: notification.taskId,
-                      },
-                    });
+                  if (!notification.taskId) {
+                    return;
                   }
+
+                  router.push({
+                    pathname: "/task-details",
+                    params: {
+                      taskId: notification.taskId,
+                    },
+                  });
                 }}
-                style={{
-                  flexDirection: "row",
-                  padding: spacing.lg,
-                  marginBottom: spacing.sm,
-                  backgroundColor: notification.read
-                    ? colors.surface
-                    : colors.surfaceElevated,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  borderRadius: radius.lg,
-                }}
+                style={({ pressed }) => [
+                  styles.notificationCard,
+                  !notification.read && styles.notificationCardUnread,
+                  pressed && styles.notificationCardPressed,
+                ]}
               >
-                <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: spacing.md,
-                    backgroundColor: colors.background,
-                    borderRadius: radius.sm,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: colors.accent,
-                      fontSize: 17,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {getIcon(notification.type)}
-                  </Text>
+                <View style={styles.iconContainer}>
+                  <NotificationIcon type={notification.type} />
                 </View>
 
-                <View style={{ flex: 1 }}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
+                <View style={styles.notificationContent}>
+                  <View style={styles.notificationHeader}>
                     <Text
-                      style={{
-                        flex: 1,
-                        color: colors.text,
-                        fontSize: 14,
-                        fontWeight: notification.read ? "500" : "600",
-                      }}
+                      style={[
+                        styles.notificationTitle,
+                        !notification.read && styles.notificationTitleUnread,
+                      ]}
+                      numberOfLines={2}
                     >
                       {notification.title}
                     </Text>
 
-                    <Text
-                      style={{
-                        marginLeft: spacing.sm,
-                        color: colors.textMuted,
-                        fontSize: 11,
-                      }}
-                    >
+                    <Text style={styles.notificationTime}>
                       {formatNotificationTime(notification.createdAt)}
                     </Text>
+
+                    {!notification.read ? (
+                      <View style={styles.unreadDot} />
+                    ) : null}
                   </View>
 
-                  <Text
-                    style={{
-                      marginTop: spacing.xs,
-                      color: colors.textSecondary,
-                      fontSize: 13,
-                      lineHeight: 19,
-                    }}
-                  >
+                  <Text style={styles.notificationBody} numberOfLines={3}>
                     {notification.body}
                   </Text>
                 </View>
@@ -236,6 +143,8 @@ export default function NotificationsScreen() {
             ))
           )}
         </ScrollView>
+
+        <BottomNav />
       </View>
     </SafeAreaView>
   );

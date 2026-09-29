@@ -13,9 +13,10 @@ import {
 } from "react-native-safe-area-context";
 import { spacing } from "../constants/spacing";
 
+import { NotificationIcon } from "../components/icons/NotificationIcon";
+import { ProfileIcon } from "../components/icons/ProfileIcon";
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
-import { sendTestNotification } from "../services/notifications";
 
 import { homeStyles } from "@/features/home/home.styles";
 
@@ -117,12 +118,31 @@ export default function HomeScreen() {
               <Text style={homeStyles.dateText}>Thu, 24 Apr 2025</Text>
             </View>
 
-            <Pressable
-              style={homeStyles.profileButton}
-              onPress={() => router.push("/settings")}
-            >
-              <Text style={homeStyles.profileIcon}>♙</Text>
-            </Pressable>
+            <View style={homeStyles.headerActions}>
+              <Pressable
+                style={({ pressed }) => [
+                  homeStyles.headerIconButton,
+                  pressed && homeStyles.buttonPressed,
+                ]}
+                onPress={() => router.push("/notifications")}
+                accessibilityRole="button"
+                accessibilityLabel="Notifications"
+              >
+                <NotificationIcon />
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  homeStyles.headerIconButton,
+                  pressed && homeStyles.buttonPressed,
+                ]}
+                onPress={() => router.push("/settings")}
+                accessibilityRole="button"
+                accessibilityLabel="Settings"
+              >
+                <ProfileIcon />
+              </Pressable>
+            </View>
           </View>
 
           {/* Date selector */}
@@ -284,11 +304,6 @@ export default function HomeScreen() {
               )}
             </View>
           </View>
-
-          {/* Test notification button */}
-          <Pressable onPress={() => void sendTestNotification()}>
-            <Text>Test Notification</Text>
-          </Pressable>
         </ScrollView>
 
         {/* Floating create button */}

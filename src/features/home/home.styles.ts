@@ -40,20 +40,21 @@ export const homeStyles = StyleSheet.create({
     fontSize: 10,
   },
 
-  profileButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+
+  headerIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  profileIcon: {
-    color: colors.text,
-    fontSize: 14,
   },
 
   dateRow: {
