@@ -11,7 +11,7 @@ import {
 
 import {
   cancelAllTaskNotifications,
-  requestNotificationPermission,
+  initializeNotifications,
 } from "@/services/notifications";
 
 export type ThemeMode = "light" | "dark";
@@ -112,7 +112,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    const granted = await requestNotificationPermission();
+    const granted = await initializeNotifications();
 
     setSettings((current) => ({
       ...current,

@@ -32,7 +32,7 @@ function NotificationBootstrap() {
     let isMounted = true;
     let notificationResponseListener: { remove: () => void } | undefined;
 
-    void getNotificationsModule().then((Notifications) => {
+    void getNotificationsModule().then(async (Notifications) => {
       if (!Notifications || !isMounted) {
         return;
       }
@@ -54,6 +54,28 @@ function NotificationBootstrap() {
             },
           });
         });
+
+      const lastResponse =
+        await Notifications.getLastNotificationResponseAsync();
+
+      if (!lastResponse || !isMounted) {
+        return;
+      }
+
+      const data = lastResponse.notification.request.content.data as {
+        taskId?: string;
+      };
+
+      if (!data.taskId) {
+        return;
+      }
+
+      router.push({
+        pathname: "/task-details",
+        params: {
+          taskId: data.taskId,
+        },
+      });
     });
 
     return () => {

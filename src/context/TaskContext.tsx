@@ -12,6 +12,7 @@ import {
 import { createNotificationMessage } from "../services/notificationRules";
 import {
   cancelScheduledNotification,
+  scheduleDeadlineReminder,
   scheduleTaskReminder,
   sendTaskCompletedNotification,
 } from "../services/notifications";
@@ -217,6 +218,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
     await Promise.all([
       cancelScheduledNotification(currentTask.scheduledNotificationId),
+      cancelScheduledNotification(currentTask.deadlineNotificationId),
       saveTasks(remainingTasks),
     ]);
   }, []);
@@ -267,12 +269,15 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
       void cancelScheduledNotification(currentTask.scheduledNotificationId);
 
+      void cancelScheduledNotification(currentTask.deadlineNotificationId);
+
       const updatedTask: Task = {
         ...currentTask,
         scheduledAt,
         stage: "scheduled",
         status: "upcoming",
         scheduledNotificationId: undefined,
+        deadlineNotificationId: undefined,
       };
 
       setTasks((currentTasks) =>
@@ -284,16 +289,18 @@ export function TaskProvider({ children }: TaskProviderProps) {
       }
 
       void (async () => {
-        const notificationId = await scheduleTaskReminder(updatedTask);
+        const [taskNotificationId, deadlineNotificationId] = await Promise.all([
+          scheduleTaskReminder(updatedTask),
+          scheduleDeadlineReminder(updatedTask),
+        ]);
 
-        if (notificationId) {
-          setTasks((currentTasks) =>
-            updateTaskById(currentTasks, taskId, (task) => ({
-              ...task,
-              scheduledNotificationId: notificationId,
-            })),
-          );
-        }
+        setTasks((currentTasks) =>
+          updateTaskById(currentTasks, taskId, (task) => ({
+            ...task,
+            scheduledNotificationId: taskNotificationId ?? undefined,
+            deadlineNotificationId: deadlineNotificationId ?? undefined,
+          })),
+        );
 
         const notificationMessage = createNotificationMessage({
           type: "task-scheduled",
@@ -356,6 +363,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
   const finishTask = useCallback(
     (task: Task) => {
       void cancelScheduledNotification(task.scheduledNotificationId);
+      void cancelScheduledNotification(task.deadlineNotificationId);
 
       const completedTask: Task = {
         ...task,
@@ -363,6 +371,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
         stage: "completed",
         completedAt: new Date().toISOString(),
         scheduledNotificationId: undefined,
+        deadlineNotificationId: undefined,
       };
 
       setTasks((currentTasks) =>

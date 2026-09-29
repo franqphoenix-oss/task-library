@@ -1,10 +1,12 @@
-import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import type { Task } from "../types/task";
 import { configureNotificationHandler } from "./notificationHandler";
 
 export const TASK_NOTIFICATION_CHANNEL = "task-library-tasks";
+
+const DEADLINE_REMINDER_OFFSET_MS = 60 * 60 * 1000;
+
 type NotificationsModule = typeof import("expo-notifications");
 
 let notificationsModulePromise: Promise<NotificationsModule | null> | undefined;
@@ -16,10 +18,7 @@ function warnNotificationFailure(operation: string, error: unknown) {
 }
 
 export function getNotificationsModule() {
-  if (
-    Platform.OS === "web" ||
-    (Platform.OS === "android" && Constants.expoGoConfig !== null)
-  ) {
+  if (Platform.OS === "web") {
     return Promise.resolve(null);
   }
 
@@ -62,7 +61,7 @@ export async function configureNotifications() {
 
 export async function requestNotificationPermission() {
   if (Platform.OS === "web") {
-    return true;
+    return false;
   }
 
   const Notifications = await getNotificationsModule();
@@ -88,6 +87,10 @@ export async function requestNotificationPermission() {
 }
 
 export async function initializeNotifications() {
+  if (Platform.OS === "web") {
+    return false;
+  }
+
   await configureNotifications();
 
   return requestNotificationPermission();
@@ -131,27 +134,22 @@ export async function sendImmediateNotification(
 }
 
 export async function scheduleTaskReminder(task: Task) {
-  if (Platform.OS === "web") {
+  if (Platform.OS === "web" || !task.scheduledAt) {
+    return null;
+  }
+
+  const scheduledDate = new Date(task.scheduledAt);
+
+  if (
+    Number.isNaN(scheduledDate.getTime()) ||
+    scheduledDate.getTime() <= Date.now()
+  ) {
     return null;
   }
 
   const Notifications = await getNotificationsModule();
 
   if (!Notifications) {
-    return null;
-  }
-
-  if (!task.scheduledAt) {
-    return null;
-  }
-
-  const scheduledDate = new Date(task.scheduledAt);
-
-  if (Number.isNaN(scheduledDate.getTime())) {
-    return null;
-  }
-
-  if (scheduledDate.getTime() <= Date.now()) {
     return null;
   }
 
@@ -165,7 +163,7 @@ export async function scheduleTaskReminder(task: Task) {
     return await Notifications.scheduleNotificationAsync({
       content: {
         title: "Task reminder",
-        body: `${task.goal} is starting soon.`,
+        body: `${task.goal} is starting now.`,
         data: {
           type: "task-reminder",
           taskId: task.id,
@@ -185,17 +183,7 @@ export async function scheduleTaskReminder(task: Task) {
 }
 
 export async function scheduleDeadlineReminder(task: Task) {
-  if (Platform.OS === "web") {
-    return null;
-  }
-
-  const Notifications = await getNotificationsModule();
-
-  if (!Notifications) {
-    return null;
-  }
-
-  if (!task.deadline) {
+  if (Platform.OS === "web" || !task.deadline) {
     return null;
   }
 
@@ -205,7 +193,17 @@ export async function scheduleDeadlineReminder(task: Task) {
     return null;
   }
 
-  if (deadline.getTime() <= Date.now()) {
+  const reminderDate = new Date(
+    deadline.getTime() - DEADLINE_REMINDER_OFFSET_MS,
+  );
+
+  if (reminderDate.getTime() <= Date.now()) {
+    return null;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
     return null;
   }
 
@@ -219,7 +217,7 @@ export async function scheduleDeadlineReminder(task: Task) {
     return await Notifications.scheduleNotificationAsync({
       content: {
         title: "Deadline approaching",
-        body: `${task.goal} is approaching its deadline.`,
+        body: `"${task.goal}" is due in about 1 hour.`,
         data: {
           type: "deadline",
           taskId: task.id,
@@ -228,7 +226,7 @@ export async function scheduleDeadlineReminder(task: Task) {
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: deadline,
+        date: reminderDate,
         channelId: TASK_NOTIFICATION_CHANNEL,
       },
     });

@@ -62,7 +62,9 @@ export type Task = TaskInput & {
   plan?: TaskPlan;
 
   scheduledAt?: string;
+
   scheduledNotificationId?: string;
+  deadlineNotificationId?: string;
 
   startedAt?: string;
   completedAt?: string;
