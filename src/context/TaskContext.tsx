@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { scheduleTaskReminder } from "../services/notifications";
+
 import { normalizeTaskPlan } from "../services/taskPlanner";
 import { loadTasks, saveTasks } from "../services/taskRepository";
 import type {
@@ -237,6 +239,21 @@ export function TaskProvider({ children }: TaskProviderProps) {
         status: "upcoming",
       })),
     );
+
+    const task = tasksRef.current.find((item) => item.id === taskId);
+
+    if (!task) {
+      return;
+    }
+
+    const updatedTask: Task = {
+      ...task,
+      scheduledAt,
+      stage: "scheduled",
+      status: "upcoming",
+    };
+
+    void scheduleTaskReminder(updatedTask);
   }, []);
 
   const startTask = useCallback((taskId: string) => {

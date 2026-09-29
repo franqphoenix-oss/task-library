@@ -15,6 +15,7 @@ import { spacing } from "../constants/spacing";
 
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
+import { sendTestNotification } from "../services/notifications";
 
 import { homeStyles } from "@/features/home/home.styles";
 
@@ -284,6 +285,10 @@ export default function HomeScreen() {
             </View>
           </View>
         </ScrollView>
+
+        <Pressable onPress={() => void sendTestNotification()}>
+          <Text>Test Notification</Text>
+        </Pressable>
 
         {/* Floating create button */}
         <Pressable
