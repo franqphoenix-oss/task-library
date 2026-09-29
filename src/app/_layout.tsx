@@ -1,16 +1,14 @@
-import * as Notifications from "expo-notifications";
 import { Stack, router } from "expo-router";
 import { useEffect } from "react";
-import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { NotificationProvider } from "@/context/NotificationContext";
 import { SettingsProvider, useSettings } from "@/context/SettingsContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { TaskProvider } from "../context/TaskContext";
-import "../services/notificationHandler";
 import {
   cancelAllTaskNotifications,
+  getNotificationsModule,
   initializeNotifications,
 } from "../services/notifications";
 
@@ -31,30 +29,36 @@ function NotificationBootstrap() {
   }, [isLoading, notificationsEnabled]);
 
   useEffect(() => {
-    if (Platform.OS === "web") {
-      return;
-    }
+    let isMounted = true;
+    let notificationResponseListener: { remove: () => void } | undefined;
 
-    const notificationResponseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data as {
-          taskId?: string;
-        };
+    void getNotificationsModule().then((Notifications) => {
+      if (!Notifications || !isMounted) {
+        return;
+      }
 
-        if (!data.taskId) {
-          return;
-        }
+      notificationResponseListener =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          const data = response.notification.request.content.data as {
+            taskId?: string;
+          };
 
-        router.push({
-          pathname: "/task-details",
-          params: {
-            taskId: data.taskId,
-          },
+          if (!data.taskId) {
+            return;
+          }
+
+          router.push({
+            pathname: "/task-details",
+            params: {
+              taskId: data.taskId,
+            },
+          });
         });
-      });
+    });
 
     return () => {
-      notificationResponseListener.remove();
+      isMounted = false;
+      notificationResponseListener?.remove();
     };
   }, []);
 

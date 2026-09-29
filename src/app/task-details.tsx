@@ -1,6 +1,13 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
@@ -70,16 +77,17 @@ export default function TaskDetailsScreen() {
 
   const { tasks, startTask, completeSubtask, completeTask, deleteTask } =
     useTasks();
+  const isDeletingTask = useRef(false);
 
-  if (!taskId) {
-    router.replace("/home");
-    return null;
-  }
+  const task = taskId ? tasks.find((item) => item.id === taskId) : undefined;
 
-  const task = tasks.find((item) => item.id === taskId);
+  useEffect(() => {
+    if ((!taskId || !task?.plan) && !isDeletingTask.current) {
+      router.replace("/home");
+    }
+  }, [task?.plan, taskId]);
 
-  if (!task?.plan) {
-    router.replace("/home");
+  if (!taskId || !task?.plan) {
     return null;
   }
 
@@ -124,24 +132,33 @@ export default function TaskDetailsScreen() {
   };
 
   const handleDeleteTask = () => {
-    Alert.alert(
-      "Delete task?",
-      `"${task.goal}" will be permanently removed from your task library.`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteTask(task.id);
-            router.replace("/tasks");
-          },
-        },
-      ],
-    );
+    const message = `"${task.goal}" will be permanently removed from your task library.`;
+    const removeTask = async () => {
+      isDeletingTask.current = true;
+      const deletion = deleteTask(task.id);
+      router.replace("/tasks");
+      await deletion;
+    };
+
+    if (Platform.OS === "web") {
+      if (globalThis.confirm(`Delete task?\n\n${message}`)) {
+        void removeTask();
+      }
+
+      return;
+    }
+
+    Alert.alert("Delete task?", message, [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: removeTask,
+      },
+    ]);
   };
 
   return (

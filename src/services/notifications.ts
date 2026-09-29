@@ -1,9 +1,13 @@
-import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import type { Task } from "../types/task";
+import { configureNotificationHandler } from "./notificationHandler";
 
 export const TASK_NOTIFICATION_CHANNEL = "task-library-tasks";
+type NotificationsModule = typeof import("expo-notifications");
+
+let notificationsModulePromise: Promise<NotificationsModule | null> | undefined;
 
 function warnNotificationFailure(operation: string, error: unknown) {
   if (__DEV__) {
@@ -11,8 +15,35 @@ function warnNotificationFailure(operation: string, error: unknown) {
   }
 }
 
+export function getNotificationsModule() {
+  if (
+    Platform.OS === "web" ||
+    (Platform.OS === "android" && Constants.expoGoConfig !== null)
+  ) {
+    return Promise.resolve(null);
+  }
+
+  notificationsModulePromise ??= import("expo-notifications")
+    .then((notifications) => {
+      configureNotificationHandler(notifications);
+      return notifications;
+    })
+    .catch((error: unknown) => {
+      warnNotificationFailure("module loading", error);
+      return null;
+    });
+
+  return notificationsModulePromise;
+}
+
 export async function configureNotifications() {
   if (Platform.OS !== "android") {
+    return;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
     return;
   }
 
@@ -32,6 +63,12 @@ export async function configureNotifications() {
 export async function requestNotificationPermission() {
   if (Platform.OS === "web") {
     return true;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
+    return false;
   }
 
   try {
@@ -65,6 +102,12 @@ export async function sendImmediateNotification(
     return null;
   }
 
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
+    return null;
+  }
+
   const granted = await requestNotificationPermission();
 
   if (!granted) {
@@ -89,6 +132,12 @@ export async function sendImmediateNotification(
 
 export async function scheduleTaskReminder(task: Task) {
   if (Platform.OS === "web") {
+    return null;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
     return null;
   }
 
@@ -137,6 +186,12 @@ export async function scheduleTaskReminder(task: Task) {
 
 export async function scheduleDeadlineReminder(task: Task) {
   if (Platform.OS === "web") {
+    return null;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
     return null;
   }
 
@@ -199,6 +254,12 @@ export async function cancelScheduledNotification(notificationId?: string) {
     return;
   }
 
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
+    return;
+  }
+
   try {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   } catch (error) {
@@ -208,6 +269,12 @@ export async function cancelScheduledNotification(notificationId?: string) {
 
 export async function cancelAllTaskNotifications() {
   if (Platform.OS === "web") {
+    return;
+  }
+
+  const Notifications = await getNotificationsModule();
+
+  if (!Notifications) {
     return;
   }
 

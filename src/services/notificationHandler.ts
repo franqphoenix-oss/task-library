@@ -1,7 +1,8 @@
-import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
+type NotificationsModule = typeof import("expo-notifications");
 
-if (Platform.OS !== "web") {
+export function configureNotificationHandler(
+  Notifications: NotificationsModule,
+) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,

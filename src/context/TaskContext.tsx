@@ -43,7 +43,7 @@ type TaskContextValue = {
 
   updateTask: (taskId: string, updates: Partial<Task>) => void;
 
-  deleteTask: (taskId: string) => void;
+  deleteTask: (taskId: string) => Promise<void>;
 
   getTaskById: (taskId: string) => Task | undefined;
 
@@ -201,17 +201,24 @@ export function TaskProvider({ children }: TaskProviderProps) {
     );
   }, []);
 
-  const deleteTask = useCallback((taskId: string) => {
+  const deleteTask = useCallback(async (taskId: string) => {
     const currentTask = tasksRef.current.find((task) => task.id === taskId);
 
     if (!currentTask) {
       return;
     }
 
-    void cancelScheduledNotification(currentTask.scheduledNotificationId);
-    setTasks((currentTasks) =>
-      currentTasks.filter((task) => task.id !== taskId),
+    const remainingTasks = tasksRef.current.filter(
+      (task) => task.id !== taskId,
     );
+
+    tasksRef.current = remainingTasks;
+    setTasks(remainingTasks);
+
+    await Promise.all([
+      cancelScheduledNotification(currentTask.scheduledNotificationId),
+      saveTasks(remainingTasks),
+    ]);
   }, []);
 
   const getTaskById = useCallback((taskId: string) => {
