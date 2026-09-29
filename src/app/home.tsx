@@ -284,11 +284,12 @@ export default function HomeScreen() {
               )}
             </View>
           </View>
-        </ScrollView>
 
-        <Pressable onPress={() => void sendTestNotification()}>
-          <Text>Test Notification</Text>
-        </Pressable>
+          {/* Test notification button */}
+          <Pressable onPress={() => void sendTestNotification()}>
+            <Text>Test Notification</Text>
+          </Pressable>
+        </ScrollView>
 
         {/* Floating create button */}
         <Pressable
