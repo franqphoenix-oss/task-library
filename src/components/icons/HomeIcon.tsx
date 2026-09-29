@@ -1,12 +1,13 @@
 import Svg, { Path } from "react-native-svg";
 
-import { colors } from "../../constants/colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type HomeIconProps = {
   active?: boolean;
 };
 
 export function HomeIcon({ active = false }: HomeIconProps) {
+  const { colors } = useTheme();
   const color = active ? colors.accent : colors.textMuted;
 
   return (

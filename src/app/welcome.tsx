@@ -1,14 +1,20 @@
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { welcomeStyles } from "../features/auth/welcome.styles";
+import { useSettings } from "../context/SettingsContext";
+import { useTheme } from "../context/ThemeContext";
+import { createWelcomeStyles } from "../features/auth/welcome.styles";
 
 export default function WelcomeScreen() {
+  const { theme } = useSettings();
+  const { colors } = useTheme();
+  const welcomeStyles = useMemo(() => createWelcomeStyles(colors), [colors]);
   return (
     <SafeAreaView style={welcomeStyles.safeArea} edges={["top", "bottom"]}>
-      <StatusBar style="light" />
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       <View style={welcomeStyles.container}>
         <View style={welcomeStyles.content}>

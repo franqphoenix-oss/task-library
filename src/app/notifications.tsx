@@ -1,11 +1,13 @@
 import { router } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { NotificationIcon } from "../components/icons/NotificationIcon";
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useNotifications } from "../context/NotificationContext";
-import { notificationsStyles as styles } from "../features/notifications/notifications.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createNotificationsStyles } from "../features/notifications/notifications.styles";
 
 function formatNotificationTime(value: string) {
   const date = new Date(value);
@@ -35,6 +37,8 @@ function formatNotificationTime(value: string) {
 }
 
 export default function NotificationsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createNotificationsStyles(colors), [colors]);
   const { notifications, isLoading, markAsRead, markAllAsRead } =
     useNotifications();
 

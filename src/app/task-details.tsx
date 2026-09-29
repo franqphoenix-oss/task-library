@@ -1,9 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
-import { taskDetailsStyles } from "../features/tasks/task-details.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createTaskDetailsStyles } from "../features/tasks/task-details.styles";
 
 function formatScheduledAt(value?: string) {
   if (!value) {
@@ -59,6 +61,11 @@ function getStatusLabel(
 }
 
 export default function TaskDetailsScreen() {
+  const { colors } = useTheme();
+  const taskDetailsStyles = useMemo(
+    () => createTaskDetailsStyles(colors),
+    [colors],
+  );
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
 
   const { tasks, startTask, completeSubtask, completeTask } = useTasks();

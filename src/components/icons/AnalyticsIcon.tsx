@@ -1,12 +1,13 @@
 import Svg, { Path, Rect } from "react-native-svg";
 
-import { colors } from "../../constants/colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type AnalyticsIconProps = {
   active?: boolean;
 };
 
 export function AnalyticsIcon({ active = false }: AnalyticsIconProps) {
+  const { colors } = useTheme();
   const color = active ? colors.accent : colors.textMuted;
 
   return (

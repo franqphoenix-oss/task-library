@@ -4,7 +4,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
-import { scheduleTaskStyles } from "../features/tasks/schedule-task.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createScheduleTaskStyles } from "../features/tasks/schedule-task.styles";
 import {
   createScheduledDate,
   formatMonth,
@@ -19,6 +20,11 @@ import {
 } from "../services/scheduling";
 
 export default function ScheduleTaskScreen() {
+  const { colors } = useTheme();
+  const scheduleTaskStyles = useMemo(
+    () => createScheduleTaskStyles(colors),
+    [colors],
+  );
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
   const { tasks, scheduleTask } = useTasks();
 

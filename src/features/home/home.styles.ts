@@ -1,371 +1,372 @@
 import { StyleSheet } from "react-native";
 
-import { colors } from "../../constants/colors";
+import type { AppColors } from "../../constants/colors";
 import { radius, spacing } from "../../constants/spacing";
 import { typography } from "../../constants/typography";
 
-export const homeStyles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: 150,
-  },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.lg,
-  },
-
-  greeting: {
-    color: colors.text,
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.semibold,
-    marginBottom: 3,
-  },
-
-  dateText: {
-    color: colors.textSecondary,
-    fontSize: 10,
-  },
-
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-
-  headerIconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  dateRow: {
-    flexGrow: 1,
-    justifyContent: "center",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-
-  dateItem: {
-    height: 50,
-    minWidth: 38,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  dateItemActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-
-  dayText: {
-    color: colors.textSecondary,
-    fontSize: 10,
-    marginBottom: 3,
-  },
-
-  numberText: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-  },
-
-  activeDateText: {
-    color: colors.white,
-  },
-
-  nextUpCard: {
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.lg,
-  },
-
-  nextUpHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.sm,
-  },
-
-  sectionLabel: {
-    color: colors.textSecondary,
-    fontSize: 10,
-    fontWeight: typography.weights.medium,
-  },
-
-  nextUpPriority: {
-    color: colors.accent,
-    fontSize: 10,
-    fontWeight: typography.weights.semibold,
-  },
-
-  nextUpTitle: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-    marginBottom: spacing.sm,
-  },
-
-  nextUpMeta: {
-    gap: spacing.xs,
-  },
-
-  nextUpMetaText: {
-    color: colors.textSecondary,
-    fontSize: 10,
-  },
-
-  nextUpTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  nextUpDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
-    marginRight: 6,
-  },
-
-  nextUpLabel: {
-    color: colors.textSecondary,
-    fontSize: 10,
-    fontWeight: typography.weights.medium,
-  },
-
-  moreIcon: {
-    color: colors.textSecondary,
-    fontSize: 18,
-  },
-
-  taskTitle: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-    marginBottom: 4,
-  },
-
-  taskTime: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginBottom: spacing.md,
-  },
-
-  taskBottomRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  taskStatus: {
-    width: 15,
-    height: 15,
-    borderRadius: 8,
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
-
-  checkText: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
-  taskProgressTrack: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.surfaceElevated,
-    overflow: "hidden",
-  },
-
-  taskProgressFill: {
-    height: "100%",
-    backgroundColor: colors.accent,
-  },
-
-  taskPercentage: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginLeft: spacing.sm,
-  },
-
-  progressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-
-  sectionTitle: {
-    color: colors.text,
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
-  },
-
-  progressSummary: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
-  progressRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.lg,
-  },
-
-  progressTrack: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.surfaceElevated,
-    overflow: "hidden",
-    marginRight: spacing.sm,
-  },
-
-  progressFill: {
-    height: "100%",
-    borderRadius: 3,
-    backgroundColor: colors.accent,
-  },
-
-  progressPercentage: {
-    color: colors.textSecondary,
-    fontSize: 9,
-  },
-
-  scheduleSection: {
-    marginTop: spacing.xs,
-  },
-
-  scheduleCard: {
-    marginTop: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-
-  scheduleItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  scheduleItemSpacing: {
-    marginBottom: spacing.md,
-  },
-
-  scheduleContent: {
-    flex: 1,
-  },
-
-  scheduleEmpty: {
-    color: colors.textSecondary,
-    fontSize: 10,
-  },
-
-  scheduleMeta: {
-    color: colors.textSecondary,
-    fontSize: 9,
-    marginTop: 2,
-  },
-
-  scheduleTime: {
-    width: 76,
-    color: colors.textSecondary,
-    fontSize: 8,
-  },
-
-  scheduleIcon: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
-
-  breakIcon: {
-    backgroundColor: colors.surfaceElevated,
-  },
-
-  scheduleIconText: {
-    color: colors.white,
-    fontSize: 9,
-  },
-
-  scheduleTitle: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 10,
-  },
-
-  breakTitle: {
-    color: colors.textSecondary,
-  },
-
-  createButton: {
-    position: "absolute",
-    right: spacing.lg,
-    height: 44,
-    borderRadius: radius.full,
-    backgroundColor: colors.accent,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 5,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: {
-      width: 0,
-      height: 4,
+export const createHomeStyles = (colors: AppColors) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-  },
 
-  createPlus: {
-    color: colors.white,
-    fontSize: 19,
-    lineHeight: 19,
-    marginRight: 5,
-  },
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  createText: {
-    color: colors.white,
-    fontSize: 10,
-    fontWeight: typography.weights.semibold,
-  },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      paddingBottom: 150,
+    },
 
-  buttonPressed: {
-    opacity: 0.75,
-  },
-});
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.lg,
+    },
+
+    greeting: {
+      color: colors.text,
+      fontSize: typography.sizes.md,
+      fontWeight: typography.weights.semibold,
+      marginBottom: 3,
+    },
+
+    dateText: {
+      color: colors.textSecondary,
+      fontSize: 10,
+    },
+
+    headerActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+
+    headerIconButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    dateRow: {
+      flexGrow: 1,
+      justifyContent: "center",
+      gap: 6,
+      marginBottom: spacing.md,
+    },
+
+    dateItem: {
+      height: 50,
+      minWidth: 38,
+      borderRadius: radius.sm,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    dateItemActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+
+    dayText: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      marginBottom: 3,
+    },
+
+    numberText: {
+      color: colors.text,
+      fontSize: typography.sizes.sm,
+      fontWeight: typography.weights.semibold,
+    },
+
+    activeDateText: {
+      color: colors.white,
+    },
+
+    nextUpCard: {
+      padding: spacing.lg,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.lg,
+    },
+
+    nextUpHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.sm,
+    },
+
+    sectionLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      fontWeight: typography.weights.medium,
+    },
+
+    nextUpPriority: {
+      color: colors.accent,
+      fontSize: 10,
+      fontWeight: typography.weights.semibold,
+    },
+
+    nextUpTitle: {
+      color: colors.text,
+      fontSize: typography.sizes.sm,
+      fontWeight: typography.weights.semibold,
+      marginBottom: spacing.sm,
+    },
+
+    nextUpMeta: {
+      gap: spacing.xs,
+    },
+
+    nextUpMetaText: {
+      color: colors.textSecondary,
+      fontSize: 10,
+    },
+
+    nextUpTitleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    nextUpDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: colors.danger,
+      marginRight: 6,
+    },
+
+    nextUpLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      fontWeight: typography.weights.medium,
+    },
+
+    moreIcon: {
+      color: colors.textSecondary,
+      fontSize: 18,
+    },
+
+    taskTitle: {
+      color: colors.text,
+      fontSize: typography.sizes.sm,
+      fontWeight: typography.weights.semibold,
+      marginBottom: 4,
+    },
+
+    taskTime: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      marginBottom: spacing.md,
+    },
+
+    taskBottomRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    taskStatus: {
+      width: 15,
+      height: 15,
+      borderRadius: 8,
+      backgroundColor: colors.surfaceElevated,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: spacing.sm,
+    },
+
+    checkText: {
+      color: colors.textSecondary,
+      fontSize: 9,
+    },
+
+    taskProgressTrack: {
+      flex: 1,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.surfaceElevated,
+      overflow: "hidden",
+    },
+
+    taskProgressFill: {
+      height: "100%",
+      backgroundColor: colors.accent,
+    },
+
+    taskPercentage: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      marginLeft: spacing.sm,
+    },
+
+    progressHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: spacing.sm,
+    },
+
+    sectionTitle: {
+      color: colors.text,
+      fontSize: typography.sizes.sm,
+      fontWeight: typography.weights.semibold,
+    },
+
+    progressSummary: {
+      color: colors.textSecondary,
+      fontSize: 9,
+    },
+
+    progressRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: spacing.lg,
+    },
+
+    progressTrack: {
+      flex: 1,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.surfaceElevated,
+      overflow: "hidden",
+      marginRight: spacing.sm,
+    },
+
+    progressFill: {
+      height: "100%",
+      borderRadius: 3,
+      backgroundColor: colors.accent,
+    },
+
+    progressPercentage: {
+      color: colors.textSecondary,
+      fontSize: 9,
+    },
+
+    scheduleSection: {
+      marginTop: spacing.xs,
+    },
+
+    scheduleCard: {
+      marginTop: spacing.sm,
+      padding: spacing.lg,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    scheduleItem: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    scheduleItemSpacing: {
+      marginBottom: spacing.md,
+    },
+
+    scheduleContent: {
+      flex: 1,
+    },
+
+    scheduleEmpty: {
+      color: colors.textSecondary,
+      fontSize: 10,
+    },
+
+    scheduleMeta: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      marginTop: 2,
+    },
+
+    scheduleTime: {
+      width: 76,
+      color: colors.textSecondary,
+      fontSize: 8,
+    },
+
+    scheduleIcon: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: colors.accent,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: spacing.sm,
+    },
+
+    breakIcon: {
+      backgroundColor: colors.surfaceElevated,
+    },
+
+    scheduleIconText: {
+      color: colors.white,
+      fontSize: 9,
+    },
+
+    scheduleTitle: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 10,
+    },
+
+    breakTitle: {
+      color: colors.textSecondary,
+    },
+
+    createButton: {
+      position: "absolute",
+      right: spacing.lg,
+      height: 44,
+      borderRadius: radius.full,
+      backgroundColor: colors.accent,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 5,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+    },
+
+    createPlus: {
+      color: colors.white,
+      fontSize: 19,
+      lineHeight: 19,
+      marginRight: 5,
+    },
+
+    createText: {
+      color: colors.white,
+      fontSize: 10,
+      fontWeight: typography.weights.semibold,
+    },
+
+    buttonPressed: {
+      opacity: 0.75,
+    },
+  });

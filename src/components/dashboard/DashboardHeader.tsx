@@ -1,8 +1,16 @@
 import { Text, View } from "react-native";
 
-import { dashboardHeaderStyles } from "./dashboard-header.styles";
+import { useMemo } from "react";
+
+import { useTheme } from "../../context/ThemeContext";
+import { createDashboardHeaderStyles } from "./dashboard-header.styles";
 
 export function DashboardHeader() {
+  const { colors } = useTheme();
+  const dashboardHeaderStyles = useMemo(
+    () => createDashboardHeaderStyles(colors),
+    [colors],
+  );
   return (
     <View style={dashboardHeaderStyles.container}>
       <View>

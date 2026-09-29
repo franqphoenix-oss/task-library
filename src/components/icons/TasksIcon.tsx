@@ -1,12 +1,13 @@
 import Svg, { Path, Rect } from "react-native-svg";
 
-import { colors } from "../../constants/colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type TasksIconProps = {
   active?: boolean;
 };
 
 export function TasksIcon({ active = false }: TasksIconProps) {
+  const { colors } = useTheme();
   const color = active ? colors.accent : colors.textMuted;
 
   return (

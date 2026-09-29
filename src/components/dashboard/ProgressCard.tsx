@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Text, View } from "react-native";
 
-import { progressCardStyles } from "./progress-card.styles";
+import { useTheme } from "../../context/ThemeContext";
+import { createProgressCardStyles } from "./progress-card.styles";
 
 type ProgressCardProps = {
   completed: number;
@@ -8,6 +10,11 @@ type ProgressCardProps = {
 };
 
 export function ProgressCard({ completed, total }: ProgressCardProps) {
+  const { colors } = useTheme();
+  const progressCardStyles = useMemo(
+    () => createProgressCardStyles(colors),
+    [colors],
+  );
   const progress = total > 0 ? completed / total : 0;
   const percentage = Math.round(progress * 100);
 

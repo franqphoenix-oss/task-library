@@ -1,13 +1,15 @@
 import { router, usePathname } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useTheme } from "../../context/ThemeContext";
 import { AnalyticsIcon } from "../icons/AnalyticsIcon";
 import { HomeIcon } from "../icons/HomeIcon";
 import { SettingsIcon } from "../icons/SettingsIcon";
 import { TasksIcon } from "../icons/TasksIcon";
 
-import { bottomNavStyles } from "./bottom-nav.styles";
+import { createBottomNavStyles } from "./bottom-nav.styles";
 
 type Tab = {
   label: string;
@@ -22,6 +24,11 @@ const tabs: Tab[] = [
 ];
 
 export function BottomNav() {
+  const { colors } = useTheme();
+  const bottomNavStyles = useMemo(
+    () => createBottomNavStyles(colors),
+    [colors],
+  );
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 

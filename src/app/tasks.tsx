@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   SafeAreaView,
@@ -7,7 +8,8 @@ import {
 
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
-import { tasksStyles } from "../features/tasks/tasks.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createTasksStyles } from "../features/tasks/tasks.styles";
 import type { Task } from "../types/task";
 
 function formatDate(value?: string) {
@@ -69,6 +71,8 @@ function TaskCard({
   onPress: () => void;
   onStart?: () => void;
 }) {
+  const { colors } = useTheme();
+  const tasksStyles = useMemo(() => createTasksStyles(colors), [colors]);
   const progress = getProgress(task);
 
   const isCompleted = task.status === "completed";
@@ -159,6 +163,8 @@ function TaskCard({
 }
 
 export default function TasksScreen() {
+  const { colors } = useTheme();
+  const tasksStyles = useMemo(() => createTasksStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { tasks, startTask } = useTasks();
 

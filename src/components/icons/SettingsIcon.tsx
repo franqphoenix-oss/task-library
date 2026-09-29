@@ -1,12 +1,13 @@
 import Svg, { Circle, Path } from "react-native-svg";
 
-import { colors } from "../../constants/colors";
+import { useTheme } from "../../context/ThemeContext";
 
 type SettingsIconProps = {
   active?: boolean;
 };
 
 export function SettingsIcon({ active = false }: SettingsIconProps) {
+  const { colors } = useTheme();
   const color = active ? colors.accent : colors.textMuted;
 
   return (

@@ -1,10 +1,11 @@
 import * as Notifications from "expo-notifications";
-import { Stack, ThemeProvider, router } from "expo-router";
+import { Stack, router } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { NotificationProvider } from "@/context/NotificationContext";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { TaskProvider } from "../context/TaskContext";
 import "../services/notificationHandler";
 import { initializeNotifications } from "../services/notifications";

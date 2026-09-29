@@ -7,10 +7,10 @@ import {
 } from "react-native-safe-area-context";
 
 import { BackIcon } from "../components/icons/BackIcon";
-import { colors } from "../constants/colors";
 import { radius, spacing } from "../constants/spacing";
 import { typography } from "../constants/typography";
 import { useTasks } from "../context/TaskContext";
+import { useTheme } from "../context/ThemeContext";
 import {
   formatMonth,
   formatScheduleDate,
@@ -55,6 +55,7 @@ function getTaskDate(task: { scheduledAt?: string; deadline: string }) {
 }
 
 export default function CalendarScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { tasks } = useTasks();
 

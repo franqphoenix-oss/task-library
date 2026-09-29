@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -6,7 +7,8 @@ import { SettingsRowIcon } from "../components/icons/SettingsRowIcon";
 import { BottomNav } from "../components/navigation/BottomNav";
 
 import { useSettings } from "@/context/SettingsContext";
-import { settingsStyles } from "@/features/settings/settings.styles";
+import { useTheme } from "@/context/ThemeContext";
+import { createSettingsStyles } from "@/features/settings/settings.styles";
 
 type SettingItem = {
   label: string;
@@ -52,6 +54,8 @@ const settingsItems: SettingItem[] = [
 ];
 
 export default function SettingsScreen() {
+  const { colors } = useTheme();
+  const settingsStyles = useMemo(() => createSettingsStyles(colors), [colors]);
   const handleSettingPress = (item: SettingItem) => {
     if (item.route) {
       router.push(item.route);
@@ -85,43 +89,45 @@ export default function SettingsScreen() {
               </View>
             </View>
 
-            <Pressable
-              style={[
-                settingsStyles.appearanceOption,
-                theme === "light" && settingsStyles.appearanceOptionActive,
-              ]}
-              onPress={() => setTheme("light")}
-              accessibilityRole="button"
-              accessibilityLabel="Use light mode"
-            >
-              <Text
+            <View style={settingsStyles.appearanceToggle}>
+              <Pressable
                 style={[
-                  settingsStyles.appearanceText,
-                  theme === "light" && settingsStyles.appearanceTextActive,
+                  settingsStyles.appearanceOption,
+                  theme === "light" && settingsStyles.appearanceOptionActive,
                 ]}
+                onPress={() => setTheme("light")}
+                accessibilityRole="button"
+                accessibilityLabel="Use light mode"
               >
-                Light
-              </Text>
-            </Pressable>
+                <Text
+                  style={[
+                    settingsStyles.appearanceText,
+                    theme === "light" && settingsStyles.appearanceTextActive,
+                  ]}
+                >
+                  Light
+                </Text>
+              </Pressable>
 
-            <Pressable
-              style={[
-                settingsStyles.appearanceOption,
-                theme === "dark" && settingsStyles.appearanceOptionActive,
-              ]}
-              onPress={() => setTheme("dark")}
-              accessibilityRole="button"
-              accessibilityLabel="Use dark mode"
-            >
-              <Text
+              <Pressable
                 style={[
-                  settingsStyles.appearanceText,
-                  theme === "dark" && settingsStyles.appearanceTextActive,
+                  settingsStyles.appearanceOption,
+                  theme === "dark" && settingsStyles.appearanceOptionActive,
                 ]}
+                onPress={() => setTheme("dark")}
+                accessibilityRole="button"
+                accessibilityLabel="Use dark mode"
               >
-                Dark
-              </Text>
-            </Pressable>
+                <Text
+                  style={[
+                    settingsStyles.appearanceText,
+                    theme === "dark" && settingsStyles.appearanceTextActive,
+                  ]}
+                >
+                  Dark
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           <View style={settingsStyles.menu}>

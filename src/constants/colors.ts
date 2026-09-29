@@ -6,6 +6,7 @@ export const darkColors = {
   surfaceElevated: "#101C2D",
 
   border: "#1B2A3D",
+  notificationBorder: "#263852",
 
   text: "#F8FAFC",
   textSecondary: "#94A3B8",
@@ -28,10 +29,11 @@ export const lightColors = {
   surfaceElevated: "#EEF1F7",
 
   border: "#E2E8F0",
+  notificationBorder: "#E2E8F0",
 
-  text: "#0F172A",
-  textSecondary: "#64748B",
-  textMuted: "#94A3B8",
+  text: "#000000",
+  textSecondary: "#334155",
+  textMuted: "#475569",
 
   accent: "#6366F1",
   accentSecondary: "#8B5CF6",
@@ -44,7 +46,9 @@ export const lightColors = {
   black: "#000000",
 } as const;
 
-export type AppColors = typeof darkColors;
+export type AppColors = {
+  [ColorName in keyof typeof darkColors]: string;
+};
 
 export function getColors(theme: ThemeMode): AppColors {
   return theme === "light" ? lightColors : darkColors;

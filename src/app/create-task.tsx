@@ -14,7 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BackIcon } from "../components/icons/BackIcon";
 import { useTasks } from "../context/TaskContext";
-import { createTaskStyles } from "../features/tasks/create-task.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createCreateTaskStyles } from "../features/tasks/create-task.styles";
 import type {
   AvailableTime,
   ManualSubtaskInput,
@@ -128,6 +129,11 @@ function createEmptyStep(): StepDraft {
 }
 
 export default function CreateTaskScreen() {
+  const { colors } = useTheme();
+  const createTaskStyles = useMemo(
+    () => createCreateTaskStyles(colors),
+    [colors],
+  );
   const { createManualTask } = useTasks();
 
   const today = useMemo(() => startOfDay(new Date()), []);

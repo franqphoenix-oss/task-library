@@ -1,11 +1,18 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
-import { generatedPlanStyles } from "../features/tasks/generated-plan.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createGeneratedPlanStyles } from "../features/tasks/generated-plan.styles";
 
 export default function GeneratedPlanScreen() {
+  const { colors } = useTheme();
+  const generatedPlanStyles = useMemo(
+    () => createGeneratedPlanStyles(colors),
+    [colors],
+  );
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
   const { getTaskById } = useTasks();
 

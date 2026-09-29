@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
-import { aiProcessingStyles } from "../features/tasks/ai-processing.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createAiProcessingStyles } from "../features/tasks/ai-processing.styles";
 
 import {
   createMockTaskPlan,
@@ -12,6 +13,11 @@ import {
 } from "../services/taskPlanner";
 
 export default function AiProcessingScreen() {
+  const { colors } = useTheme();
+  const aiProcessingStyles = useMemo(
+    () => createAiProcessingStyles(colors),
+    [colors],
+  );
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
 
   const { getTaskById, attachPlan, setTaskStage } = useTasks();

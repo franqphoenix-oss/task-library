@@ -11,8 +11,8 @@ import {
   type AnalyticsPeriod,
 } from "../services/analytics";
 
-import { colors } from "../constants/colors";
-import { analyticsStyles as styles } from "../features/analytics/analytics.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createAnalyticsStyles } from "../features/analytics/analytics.styles";
 
 function formatDelta(value: number, suffix = "") {
   if (value === 0) {
@@ -27,6 +27,8 @@ function ProductivityChart({
 }: {
   values: { label: string; completed: number }[];
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createAnalyticsStyles(colors), [colors]);
   const width = 300;
   const height = 130;
   const horizontalPadding = 8;
@@ -118,6 +120,8 @@ function ProductivityChart({
 }
 
 export default function AnalyticsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createAnalyticsStyles(colors), [colors]);
   const { tasks, isLoading } = useTasks();
   const [period, setPeriod] = useState<AnalyticsPeriod>("month");
 

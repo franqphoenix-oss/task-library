@@ -1,8 +1,9 @@
 import Svg, { Path } from "react-native-svg";
 
-import { colors } from "../../constants/colors";
+import { useTheme } from "../../context/ThemeContext";
 
 export function BackIcon() {
+  const { colors } = useTheme();
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <Path

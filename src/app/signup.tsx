@@ -1,11 +1,14 @@
 import { router } from "expo-router";
+import { useMemo } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "../constants/colors";
-import { signupStyles } from "../features/auth/signup.styles";
+import { useTheme } from "../context/ThemeContext";
+import { createSignupStyles } from "../features/auth/signup.styles";
 
 export default function SignupScreen() {
+  const { colors } = useTheme();
+  const signupStyles = useMemo(() => createSignupStyles(colors), [colors]);
   return (
     <SafeAreaView style={signupStyles.safeArea} edges={["top", "bottom"]}>
       <View style={signupStyles.container}>

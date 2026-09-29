@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Text, View } from "react-native";
 
-import { upcomingTaskStyles } from "./upcoming-task.styles";
+import { useTheme } from "../../context/ThemeContext";
+import { createUpcomingTaskStyles } from "./upcoming-task.styles";
 
 type UpcomingTaskProps = {
   title: string;
@@ -15,6 +17,11 @@ export function UpcomingTask({
   duration,
   status,
 }: UpcomingTaskProps) {
+  const { colors } = useTheme();
+  const upcomingTaskStyles = useMemo(
+    () => createUpcomingTaskStyles(colors),
+    [colors],
+  );
   const active = status === "in-progress";
 
   return (

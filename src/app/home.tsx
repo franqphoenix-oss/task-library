@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -17,8 +17,9 @@ import { NotificationIcon } from "../components/icons/NotificationIcon";
 import { ProfileIcon } from "../components/icons/ProfileIcon";
 import { BottomNav } from "../components/navigation/BottomNav";
 import { useTasks } from "../context/TaskContext";
+import { useTheme } from "../context/ThemeContext";
 
-import { homeStyles } from "@/features/home/home.styles";
+import { createHomeStyles } from "@/features/home/home.styles";
 
 const dates = [
   { day: "Mon", date: "21" },
@@ -62,6 +63,8 @@ function getTaskProgress(task: {
 }
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const homeStyles = useMemo(() => createHomeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
 
   const bottomNavHeight = 64 + Math.max(insets.bottom, 8);
