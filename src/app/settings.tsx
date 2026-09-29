@@ -158,18 +158,25 @@ export default function SettingsScreen() {
                   <Text style={settingsStyles.menuText}>{item.label}</Text>
 
                   {isNotifications ? (
-                    <Switch
-                      value={notificationsEnabled}
-                      onValueChange={(enabled) => {
-                        void setNotificationsEnabled(enabled);
+                    <Pressable
+                      onPress={(event) => {
+                        event.stopPropagation();
                       }}
-                      trackColor={{
-                        false: colors.surfaceElevated,
-                        true: colors.accent,
-                      }}
-                      thumbColor={colors.white}
-                      accessibilityLabel="Enable notifications"
-                    />
+                      accessibilityRole="none"
+                    >
+                      <Switch
+                        value={notificationsEnabled}
+                        onValueChange={(enabled) => {
+                          void setNotificationsEnabled(enabled);
+                        }}
+                        trackColor={{
+                          false: colors.surfaceElevated,
+                          true: colors.accent,
+                        }}
+                        thumbColor={colors.white}
+                        accessibilityLabel="Enable notifications"
+                      />
+                    </Pressable>
                   ) : (
                     <Text style={settingsStyles.chevron}>›</Text>
                   )}
