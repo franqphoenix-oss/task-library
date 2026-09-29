@@ -1,9 +1,10 @@
 import * as Notifications from "expo-notifications";
-import { Stack, router } from "expo-router";
+import { Stack, ThemeProvider, router } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { NotificationProvider } from "@/context/NotificationContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 import { TaskProvider } from "../context/TaskContext";
 import "../services/notificationHandler";
 import { initializeNotifications } from "../services/notifications";
@@ -37,18 +38,19 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <NotificationProvider>
-        <TaskProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: {
-                backgroundColor: "#050B14",
-              },
-            }}
-          />
-        </TaskProvider>
-      </NotificationProvider>
+      <SettingsProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <TaskProvider>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                }}
+              />
+            </TaskProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

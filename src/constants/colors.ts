@@ -1,4 +1,6 @@
-export const colors = {
+export type ThemeMode = "light" | "dark";
+
+export const darkColors = {
   background: "#050B14",
   surface: "#0B1422",
   surfaceElevated: "#101C2D",
@@ -19,3 +21,31 @@ export const colors = {
   white: "#FFFFFF",
   black: "#000000",
 } as const;
+
+export const lightColors = {
+  background: "#F6F7FB",
+  surface: "#FFFFFF",
+  surfaceElevated: "#EEF1F7",
+
+  border: "#E2E8F0",
+
+  text: "#0F172A",
+  textSecondary: "#64748B",
+  textMuted: "#94A3B8",
+
+  accent: "#6366F1",
+  accentSecondary: "#8B5CF6",
+
+  success: "#16A34A",
+  warning: "#D97706",
+  danger: "#DC2626",
+
+  white: "#FFFFFF",
+  black: "#000000",
+} as const;
+
+export type AppColors = typeof darkColors;
+
+export function getColors(theme: ThemeMode): AppColors {
+  return theme === "light" ? lightColors : darkColors;
+}
