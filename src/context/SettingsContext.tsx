@@ -9,6 +9,11 @@ import {
   type PropsWithChildren,
 } from "react";
 
+import {
+  cancelAllTaskNotifications,
+  requestNotificationPermission,
+} from "@/services/notifications";
+
 export type ThemeMode = "light" | "dark";
 
 type SettingsState = {
@@ -19,7 +24,7 @@ type SettingsState = {
 type SettingsContextValue = SettingsState & {
   isLoading: boolean;
   setTheme: (theme: ThemeMode) => void;
-  setNotificationsEnabled: (enabled: boolean) => void;
+  setNotificationsEnabled: (enabled: boolean) => Promise<void>;
 };
 
 const SETTINGS_STORAGE_KEY = "@task-library/settings";
@@ -95,10 +100,23 @@ export function SettingsProvider({ children }: PropsWithChildren) {
     }));
   }, []);
 
-  const setNotificationsEnabled = useCallback((enabled: boolean) => {
+  const setNotificationsEnabled = useCallback(async (enabled: boolean) => {
+    if (!enabled) {
+      await cancelAllTaskNotifications();
+
+      setSettings((current) => ({
+        ...current,
+        notificationsEnabled: false,
+      }));
+
+      return;
+    }
+
+    const granted = await requestNotificationPermission();
+
     setSettings((current) => ({
       ...current,
-      notificationsEnabled: enabled,
+      notificationsEnabled: granted,
     }));
   }, []);
 

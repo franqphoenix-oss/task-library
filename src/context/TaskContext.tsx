@@ -30,6 +30,8 @@ import type {
 } from "../types/task";
 import { useNotifications } from "./NotificationContext";
 
+import { useSettings } from "./SettingsContext";
+
 type TaskContextValue = {
   tasks: Task[];
 
@@ -100,6 +102,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotifications();
+  const { notificationsEnabled } = useSettings();
 
   /*
    * This prevents persistence from writing the initial empty state
@@ -266,6 +269,10 @@ export function TaskProvider({ children }: TaskProviderProps) {
         updateTaskById(currentTasks, taskId, () => updatedTask),
       );
 
+      if (!notificationsEnabled) {
+        return;
+      }
+
       void (async () => {
         const notificationId = await scheduleTaskReminder(updatedTask);
 
@@ -277,22 +284,9 @@ export function TaskProvider({ children }: TaskProviderProps) {
             })),
           );
         }
-
-        const notificationMessage = createNotificationMessage({
-          type: "task-scheduled",
-          task: updatedTask,
-        });
-
-        if (notificationMessage) {
-          addNotification({
-            ...notificationMessage,
-            taskId,
-            read: false,
-          });
-        }
       })();
     },
-    [addNotification],
+    [addNotification, notificationsEnabled],
   );
 
   const startTask = useCallback((taskId: string) => {

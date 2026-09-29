@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SettingsRowIcon } from "../components/icons/SettingsRowIcon";
@@ -62,7 +62,8 @@ export default function SettingsScreen() {
     }
   };
 
-  const { theme, setTheme } = useSettings();
+  const { theme, setTheme, notificationsEnabled, setNotificationsEnabled } =
+    useSettings();
 
   return (
     <SafeAreaView style={settingsStyles.safeArea} edges={["top"]}>
@@ -133,7 +134,19 @@ export default function SettingsScreen() {
           <View style={settingsStyles.menu}>
             {settingsItems.map((item, index) => {
               const isLast = index === settingsItems.length - 1;
-              const interactive = Boolean(item.route);
+              const isNotifications = item.label === "Notifications";
+              const interactive = Boolean(item.route) || isNotifications;
+
+              const handlePress = () => {
+                if (isNotifications) {
+                  void setNotificationsEnabled(!notificationsEnabled);
+                  return;
+                }
+
+                if (item.route) {
+                  router.push(item.route);
+                }
+              };
 
               return (
                 <Pressable
@@ -143,7 +156,7 @@ export default function SettingsScreen() {
                     !isLast && settingsStyles.menuItemBorder,
                     pressed && interactive && settingsStyles.pressed,
                   ]}
-                  onPress={() => handleSettingPress(item)}
+                  onPress={handlePress}
                   disabled={!interactive}
                   accessibilityRole={interactive ? "button" : undefined}
                   accessibilityLabel={item.label}
@@ -154,7 +167,22 @@ export default function SettingsScreen() {
 
                   <Text style={settingsStyles.menuText}>{item.label}</Text>
 
-                  <Text style={settingsStyles.chevron}>›</Text>
+                  {isNotifications ? (
+                    <Switch
+                      value={notificationsEnabled}
+                      onValueChange={(enabled) => {
+                        void setNotificationsEnabled(enabled);
+                      }}
+                      trackColor={{
+                        false: colors.surfaceElevated,
+                        true: colors.accent,
+                      }}
+                      thumbColor={colors.white}
+                      accessibilityLabel="Enable notifications"
+                    />
+                  ) : (
+                    <Text style={settingsStyles.chevron}>›</Text>
+                  )}
                 </Pressable>
               );
             })}
