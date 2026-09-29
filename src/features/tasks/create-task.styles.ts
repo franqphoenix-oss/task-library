@@ -162,8 +162,25 @@ export const createCreateTaskStyles = (colors: AppColors) =>
       marginTop: spacing.xxl,
     },
 
+    secondaryButton: {
+      minHeight: 50,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius.sm,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginTop: spacing.md,
+    },
+
     submitText: {
       color: colors.white,
+      fontSize: typography.sizes.sm,
+      fontWeight: typography.weights.semibold,
+    },
+
+    secondaryButtonText: {
+      color: colors.text,
       fontSize: typography.sizes.sm,
       fontWeight: typography.weights.semibold,
     },

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,13 +29,47 @@ export default function ScheduleTaskScreen() {
   const { tasks, scheduleTask } = useTasks();
 
   const today = useMemo(() => new Date(), []);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const existingScheduledDate = taskId
+    ? (() => {
+        const currentTask = tasks.find((item) => item.id === taskId);
+
+        if (!currentTask?.scheduledAt) {
+          return null;
+        }
+
+        const date = new Date(currentTask.scheduledAt);
+        return Number.isNaN(date.getTime()) ? null : date;
+      })()
+    : null;
+
+  const initialDate = existingScheduledDate ?? today;
 
   const [visibleMonth, setVisibleMonth] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1),
+    new Date(initialDate.getFullYear(), initialDate.getMonth(), 1),
   );
 
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
-  const [selectedTime, setSelectedTime] = useState<ScheduleTime | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+  const [selectedTime, setSelectedTime] = useState<ScheduleTime | null>(() => {
+    if (!existingScheduledDate) {
+      return null;
+    }
+
+    const hours = String(existingScheduledDate.getHours()).padStart(2, "0");
+    const minutes = String(existingScheduledDate.getMinutes()).padStart(2, "0");
+    const existingTime = `${hours}:${minutes}`;
+
+    return SCHEDULE_TIME_OPTIONS.includes(existingTime as ScheduleTime)
+      ? (existingTime as ScheduleTime)
+      : null;
+  });
 
   if (!taskId) {
     router.replace("/home");
@@ -59,7 +93,7 @@ export default function ScheduleTaskScreen() {
 
   const isValidSelection =
     scheduledDate !== null &&
-    scheduledDate.getTime() > Date.now() &&
+    scheduledDate.getTime() > now &&
     (deadline === null || scheduledDate.getTime() <= deadline.getTime());
 
   const moveMonth = (amount: number) => {
@@ -81,9 +115,9 @@ export default function ScheduleTaskScreen() {
     scheduleTask(task.id, scheduledDate.toISOString());
 
     router.replace({
-      pathname: "/home",
+      pathname: "/task-details",
       params: {
-        scheduled: "true",
+        taskId: task.id,
       },
     });
   };
@@ -103,9 +137,13 @@ export default function ScheduleTaskScreen() {
           </Pressable>
 
           <View style={scheduleTaskStyles.headerCopy}>
-            <Text style={scheduleTaskStyles.eyebrow}>SCHEDULE</Text>
+            <Text style={scheduleTaskStyles.eyebrow}>
+              {task.scheduledAt ? "RESCHEDULE" : "SCHEDULE"}
+            </Text>
             <Text style={scheduleTaskStyles.title}>
-              When will you work on it?
+              {task.scheduledAt
+                ? "Change your work session"
+                : "When will you work on it?"}
             </Text>
             <Text style={scheduleTaskStyles.subtitle}>{task.goal}</Text>
           </View>
@@ -220,7 +258,7 @@ export default function ScheduleTaskScreen() {
             {SCHEDULE_TIME_OPTIONS.map((time) => {
               const optionDate = createScheduledDate(selectedDate, time);
               const disabled =
-                optionDate.getTime() <= Date.now() ||
+                optionDate.getTime() <= now ||
                 (deadline !== null &&
                   optionDate.getTime() > deadline.getTime());
 
@@ -276,7 +314,7 @@ export default function ScheduleTaskScreen() {
           onPress={handleSchedule}
         >
           <Text style={scheduleTaskStyles.scheduleButtonText}>
-            Schedule Task
+            {task.scheduledAt ? "Save New Schedule" : "Schedule Task"}
           </Text>
         </Pressable>
       </ScrollView>

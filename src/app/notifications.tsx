@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
                 <View style={styles.emptyIconDot} />
               </View>
 
-              <Text style={styles.emptyTitle}>You're all caught up</Text>
+              <Text style={styles.emptyTitle}>You&apos;re all caught up</Text>
 
               <Text style={styles.emptyDescription}>
                 Task reminders and important updates will appear here.

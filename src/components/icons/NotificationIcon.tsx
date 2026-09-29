@@ -1,15 +1,22 @@
 import Svg, { Path } from "react-native-svg";
 
 import { useTheme } from "../../context/ThemeContext";
+import type { NotificationType } from "../../types/notification";
 
 type NotificationIconProps = {
   size?: number;
   color?: string;
+  type?: NotificationType;
 };
 
-export function NotificationIcon({ size = 18, color }: NotificationIconProps) {
+export function NotificationIcon({
+  size = 18,
+  color,
+  type,
+}: NotificationIconProps) {
   const { colors } = useTheme();
-  const iconColor = color ?? colors.text;
+  const iconColor =
+    color ?? (type === "task-completed" ? colors.success : colors.text);
 
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

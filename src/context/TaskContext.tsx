@@ -115,7 +115,10 @@ export function TaskProvider({ children }: TaskProviderProps) {
    * Rendered screens should read `tasks` directly.
    */
   const tasksRef = useRef(tasks);
-  tasksRef.current = tasks;
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
 
   /*
    * Hydrate the task state once when the provider mounts.

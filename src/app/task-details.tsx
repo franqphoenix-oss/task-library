@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTasks } from "../context/TaskContext";
@@ -68,7 +68,8 @@ export default function TaskDetailsScreen() {
   );
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
 
-  const { tasks, startTask, completeSubtask, completeTask } = useTasks();
+  const { tasks, startTask, completeSubtask, completeTask, deleteTask } =
+    useTasks();
 
   if (!taskId) {
     router.replace("/home");
@@ -122,6 +123,27 @@ export default function TaskDetailsScreen() {
     completeSubtask(task.id, subtaskId);
   };
 
+  const handleDeleteTask = () => {
+    Alert.alert(
+      "Delete task?",
+      `"${task.goal}" will be permanently removed from your task library.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteTask(task.id);
+            router.replace("/tasks");
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <SafeAreaView style={taskDetailsStyles.safeArea} edges={["top", "bottom"]}>
       <ScrollView
@@ -134,7 +156,7 @@ export default function TaskDetailsScreen() {
               taskDetailsStyles.backButton,
               pressed && taskDetailsStyles.buttonPressed,
             ]}
-            onPress={() => router.back()}
+            onPress={() => router.replace("/tasks")}
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
@@ -362,7 +384,7 @@ export default function TaskDetailsScreen() {
           </View>
         )}
 
-        {!isActive && !isCompleted && task.stage === "created" && (
+        {!isActive && !isCompleted && !task.scheduledAt && (
           <Pressable
             style={({ pressed }) => [
               taskDetailsStyles.secondaryButton,
@@ -381,7 +403,7 @@ export default function TaskDetailsScreen() {
           </Pressable>
         )}
 
-        {task.stage === "planned" && !isActive && !isCompleted && (
+        {!isActive && !isCompleted && task.scheduledAt && (
           <Pressable
             style={({ pressed }) => [
               taskDetailsStyles.secondaryButton,
@@ -395,10 +417,48 @@ export default function TaskDetailsScreen() {
             }
           >
             <Text style={taskDetailsStyles.secondaryButtonText}>
-              Change Schedule
+              Reschedule Task
             </Text>
           </Pressable>
         )}
+
+        {!isCompleted && (
+          <Pressable
+            style={({ pressed }) => [
+              taskDetailsStyles.secondaryButton,
+              pressed && taskDetailsStyles.buttonPressed,
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: "/edit-task",
+                params: {
+                  taskId: task.id,
+                },
+              })
+            }
+          >
+            <Text style={taskDetailsStyles.secondaryButtonText}>Edit Task</Text>
+          </Pressable>
+        )}
+
+        <Pressable
+          style={({ pressed }) => [
+            taskDetailsStyles.secondaryButton,
+            pressed && taskDetailsStyles.buttonPressed,
+          ]}
+          onPress={handleDeleteTask}
+        >
+          <Text
+            style={[
+              taskDetailsStyles.secondaryButtonText,
+              {
+                color: colors.danger,
+              },
+            ]}
+          >
+            Delete Task
+          </Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );

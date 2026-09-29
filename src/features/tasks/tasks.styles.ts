@@ -45,6 +45,7 @@ export const createTasksStyles = (colors: AppColors) =>
     addButton: {
       width: 38,
       height: 38,
+      paddingBottom: spacing.xs,
       borderRadius: radius.full,
       alignItems: "center",
       justifyContent: "center",
@@ -259,6 +260,7 @@ export const createTasksStyles = (colors: AppColors) =>
       borderRadius: radius.full,
       backgroundColor: colors.surface,
       borderWidth: 1,
+      paddingBottom: spacing.xxs,
       borderColor: colors.border,
       alignItems: "center",
       justifyContent: "center",

@@ -219,7 +219,7 @@ export default function HomeScreen() {
             <Text style={homeStyles.taskTime}>
               {nextTask
                 ? `Deadline · ${formatDeadline(nextTask.deadline)}`
-                : "You're all caught up"}
+                : "You&apos;re all caught up"}
             </Text>
 
             <View style={homeStyles.taskBottomRow}>
@@ -248,7 +248,7 @@ export default function HomeScreen() {
 
           {/* Today's progress */}
           <View style={homeStyles.progressHeader}>
-            <Text style={homeStyles.sectionTitle}>Today's progress</Text>
+            <Text style={homeStyles.sectionTitle}>Today&apos;s progress</Text>
 
             <Text style={homeStyles.progressSummary}>
               {completedTasks} of {totalTasks}{" "}
@@ -273,9 +273,9 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          {/* Today's schedule */}
+          {/* Today&apos;s schedule */}
           <View style={homeStyles.scheduleSection}>
-            <Text style={homeStyles.sectionTitle}>Today's schedule</Text>
+            <Text style={homeStyles.sectionTitle}>Today&apos;s schedule</Text>
 
             <View style={homeStyles.scheduleCard}>
               {tasks.length === 0 ? (
