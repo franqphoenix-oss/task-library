@@ -24,6 +24,12 @@ export function startOfDay(date: Date) {
   return result;
 }
 
+export function addDays(date: Date, amount: number) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + amount);
+  return startOfDay(result);
+}
+
 export function getWeekDates(date: Date) {
   const currentDate = startOfDay(date);
   const mondayOffset = (currentDate.getDay() + 6) % 7;
@@ -93,6 +99,14 @@ export function formatScheduleDate(date: Date) {
   });
 }
 
+export function formatScheduleHeaderDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function createScheduledDate(date: Date, time: ScheduleTime) {
   const [hours, minutes] = time.split(":").map(Number);
 
@@ -117,4 +131,25 @@ export function getTaskDeadlineDate(task: Task) {
   }
 
   return deadline;
+}
+
+export function getScheduledTasksForDate(tasks: Task[], date: Date) {
+  return tasks
+    .filter((task) => {
+      if (!task.scheduledAt) {
+        return false;
+      }
+
+      const scheduledDate = new Date(task.scheduledAt);
+
+      return (
+        !Number.isNaN(scheduledDate.getTime()) && isSameDay(scheduledDate, date)
+      );
+    })
+    .sort((first, second) => {
+      const firstDate = new Date(first.scheduledAt ?? "").getTime();
+      const secondDate = new Date(second.scheduledAt ?? "").getTime();
+
+      return firstDate - secondDate;
+    });
 }
