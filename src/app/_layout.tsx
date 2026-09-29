@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Stack, router } from "expo-router";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -30,6 +31,10 @@ function NotificationBootstrap() {
   }, [isLoading, notificationsEnabled]);
 
   useEffect(() => {
+    if (Platform.OS === "web") {
+      return;
+    }
+
     const notificationResponseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data as {

@@ -5,30 +5,49 @@ import type { Task } from "../types/task";
 
 export const TASK_NOTIFICATION_CHANNEL = "task-library-tasks";
 
+function warnNotificationFailure(operation: string, error: unknown) {
+  if (__DEV__) {
+    console.warn(`Notification ${operation} failed.`, error);
+  }
+}
+
 export async function configureNotifications() {
   if (Platform.OS !== "android") {
     return;
   }
 
-  await Notifications.setNotificationChannelAsync(TASK_NOTIFICATION_CHANNEL, {
-    name: "Task reminders",
-    description: "Reminders and updates from Task Library.",
-    importance: Notifications.AndroidImportance.DEFAULT,
-    vibrationPattern: [0, 250, 250, 250],
-    lightColor: "#6366F1",
-  });
+  try {
+    await Notifications.setNotificationChannelAsync(TASK_NOTIFICATION_CHANNEL, {
+      name: "Task reminders",
+      description: "Reminders and updates from Task Library.",
+      importance: Notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#6366F1",
+    });
+  } catch (error) {
+    warnNotificationFailure("channel setup", error);
+  }
 }
 
 export async function requestNotificationPermission() {
-  const currentPermissions = await Notifications.getPermissionsAsync();
-
-  if (currentPermissions.granted) {
+  if (Platform.OS === "web") {
     return true;
   }
 
-  const requestedPermissions = await Notifications.requestPermissionsAsync();
+  try {
+    const currentPermissions = await Notifications.getPermissionsAsync();
 
-  return requestedPermissions.granted;
+    if (currentPermissions.granted) {
+      return true;
+    }
+
+    const requestedPermissions = await Notifications.requestPermissionsAsync();
+
+    return requestedPermissions.granted;
+  } catch (error) {
+    warnNotificationFailure("permission request", error);
+    return false;
+  }
 }
 
 export async function initializeNotifications() {
@@ -42,24 +61,37 @@ export async function sendImmediateNotification(
   body: string,
   data: Record<string, unknown> = {},
 ) {
+  if (Platform.OS === "web") {
+    return null;
+  }
+
   const granted = await requestNotificationPermission();
 
   if (!granted) {
     return null;
   }
 
-  return Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      data,
-      sound: "default",
-    },
-    trigger: null,
-  });
+  try {
+    return await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        data,
+        sound: "default",
+      },
+      trigger: null,
+    });
+  } catch (error) {
+    warnNotificationFailure("immediate delivery", error);
+    return null;
+  }
 }
 
 export async function scheduleTaskReminder(task: Task) {
+  if (Platform.OS === "web") {
+    return null;
+  }
+
   if (!task.scheduledAt) {
     return null;
   }
@@ -80,25 +112,34 @@ export async function scheduleTaskReminder(task: Task) {
     return null;
   }
 
-  return Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Task reminder",
-      body: `${task.goal} is starting soon.`,
-      data: {
-        type: "task-reminder",
-        taskId: task.id,
+  try {
+    return await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Task reminder",
+        body: `${task.goal} is starting soon.`,
+        data: {
+          type: "task-reminder",
+          taskId: task.id,
+        },
+        sound: "default",
       },
-      sound: "default",
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: scheduledDate,
-      channelId: TASK_NOTIFICATION_CHANNEL,
-    },
-  });
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: scheduledDate,
+        channelId: TASK_NOTIFICATION_CHANNEL,
+      },
+    });
+  } catch (error) {
+    warnNotificationFailure("task reminder scheduling", error);
+    return null;
+  }
 }
 
 export async function scheduleDeadlineReminder(task: Task) {
+  if (Platform.OS === "web") {
+    return null;
+  }
+
   if (!task.deadline) {
     return null;
   }
@@ -119,22 +160,27 @@ export async function scheduleDeadlineReminder(task: Task) {
     return null;
   }
 
-  return Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Deadline approaching",
-      body: `${task.goal} is approaching its deadline.`,
-      data: {
-        type: "deadline",
-        taskId: task.id,
+  try {
+    return await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Deadline approaching",
+        body: `${task.goal} is approaching its deadline.`,
+        data: {
+          type: "deadline",
+          taskId: task.id,
+        },
+        sound: "default",
       },
-      sound: "default",
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: deadline,
-      channelId: TASK_NOTIFICATION_CHANNEL,
-    },
-  });
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: deadline,
+        channelId: TASK_NOTIFICATION_CHANNEL,
+      },
+    });
+  } catch (error) {
+    warnNotificationFailure("deadline reminder scheduling", error);
+    return null;
+  }
 }
 
 export async function sendTaskCompletedNotification(task: Task) {
@@ -149,15 +195,27 @@ export async function sendTaskCompletedNotification(task: Task) {
 }
 
 export async function cancelScheduledNotification(notificationId?: string) {
-  if (!notificationId) {
+  if (Platform.OS === "web" || !notificationId) {
     return;
   }
 
-  await Notifications.cancelScheduledNotificationAsync(notificationId);
+  try {
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
+  } catch (error) {
+    warnNotificationFailure("scheduled cancellation", error);
+  }
 }
 
 export async function cancelAllTaskNotifications() {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  if (Platform.OS === "web") {
+    return;
+  }
+
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch (error) {
+    warnNotificationFailure("cancellation", error);
+  }
 }
 
 export async function sendTestNotification() {
