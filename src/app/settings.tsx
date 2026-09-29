@@ -56,11 +56,6 @@ const settingsItems: SettingItem[] = [
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const settingsStyles = useMemo(() => createSettingsStyles(colors), [colors]);
-  const handleSettingPress = (item: SettingItem) => {
-    if (item.route) {
-      router.push(item.route);
-    }
-  };
 
   const { theme, setTheme, notificationsEnabled, setNotificationsEnabled } =
     useSettings();
@@ -135,14 +130,9 @@ export default function SettingsScreen() {
             {settingsItems.map((item, index) => {
               const isLast = index === settingsItems.length - 1;
               const isNotifications = item.label === "Notifications";
-              const interactive = Boolean(item.route) || isNotifications;
+              const interactive = Boolean(item.route);
 
               const handlePress = () => {
-                if (isNotifications) {
-                  void setNotificationsEnabled(!notificationsEnabled);
-                  return;
-                }
-
                 if (item.route) {
                   router.push(item.route);
                 }

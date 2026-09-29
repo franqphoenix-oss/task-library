@@ -284,6 +284,19 @@ export function TaskProvider({ children }: TaskProviderProps) {
             })),
           );
         }
+
+        const notificationMessage = createNotificationMessage({
+          type: "task-scheduled",
+          task: updatedTask,
+        });
+
+        if (notificationMessage) {
+          addNotification({
+            ...notificationMessage,
+            taskId,
+            read: false,
+          });
+        }
       })();
     },
     [addNotification, notificationsEnabled],
@@ -346,22 +359,24 @@ export function TaskProvider({ children }: TaskProviderProps) {
         updateTaskById(currentTasks, task.id, () => completedTask),
       );
 
-      const notificationMessage = createNotificationMessage({
-        type: "task-completed",
-        task: completedTask,
-      });
-
-      if (notificationMessage) {
-        addNotification({
-          ...notificationMessage,
-          taskId: task.id,
-          read: false,
+      if (notificationsEnabled) {
+        const notificationMessage = createNotificationMessage({
+          type: "task-completed",
+          task: completedTask,
         });
-      }
 
-      void sendTaskCompletedNotification(completedTask);
+        if (notificationMessage) {
+          addNotification({
+            ...notificationMessage,
+            taskId: task.id,
+            read: false,
+          });
+        }
+
+        void sendTaskCompletedNotification(completedTask);
+      }
     },
-    [addNotification],
+    [addNotification, notificationsEnabled],
   );
 
   const completeSubtask = useCallback(

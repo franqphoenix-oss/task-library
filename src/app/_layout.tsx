@@ -4,16 +4,32 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { NotificationProvider } from "@/context/NotificationContext";
-import { SettingsProvider } from "@/context/SettingsContext";
+import { SettingsProvider, useSettings } from "@/context/SettingsContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { TaskProvider } from "../context/TaskContext";
 import "../services/notificationHandler";
-import { initializeNotifications } from "../services/notifications";
+import {
+  cancelAllTaskNotifications,
+  initializeNotifications,
+} from "../services/notifications";
 
-export default function RootLayout() {
+function NotificationBootstrap() {
+  const { isLoading, notificationsEnabled } = useSettings();
+
   useEffect(() => {
-    void initializeNotifications();
+    if (isLoading) {
+      return;
+    }
 
+    if (!notificationsEnabled) {
+      void cancelAllTaskNotifications();
+      return;
+    }
+
+    void initializeNotifications();
+  }, [isLoading, notificationsEnabled]);
+
+  useEffect(() => {
     const notificationResponseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data as {
@@ -37,12 +53,17 @@ export default function RootLayout() {
     };
   }, []);
 
+  return null;
+}
+
+export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <SettingsProvider>
         <ThemeProvider>
           <NotificationProvider>
             <TaskProvider>
+              <NotificationBootstrap />
               <Stack
                 screenOptions={{
                   headerShown: false,
