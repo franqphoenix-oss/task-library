@@ -20,9 +20,7 @@ type NotificationContextValue = {
   unreadCount: number;
   isLoading: boolean;
 
-  addNotification: (
-    notification: Omit<NotificationItem, "id" | "createdAt" | "read">,
-  ) => void;
+  addNotification: (notification: AddNotificationInput) => void;
 
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
@@ -34,6 +32,10 @@ const NotificationContext = createContext<NotificationContextValue | undefined>(
 
 type NotificationProviderProps = {
   children: ReactNode;
+};
+
+type AddNotificationInput = Omit<NotificationItem, "id" | "createdAt"> & {
+  createdAt?: string;
 };
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
@@ -69,19 +71,15 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     void saveNotifications(notifications);
   }, [notifications, isLoading]);
 
-  const addNotification = useCallback(
-    (notification: Omit<NotificationItem, "id" | "createdAt" | "read">) => {
-      const item: NotificationItem = {
-        ...notification,
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
+  const addNotification = useCallback((input: AddNotificationInput) => {
+    const notification: NotificationItem = {
+      ...input,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: input.createdAt ?? new Date().toISOString(),
+    };
 
-      setNotifications((current) => [item, ...current]);
-    },
-    [],
-  );
+    setNotifications((current) => [notification, ...current]);
+  }, []);
 
   const markAsRead = useCallback((notificationId: string) => {
     setNotifications((current) =>

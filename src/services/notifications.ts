@@ -98,6 +98,68 @@ export async function scheduleTaskReminder(task: Task) {
   });
 }
 
+export async function scheduleDeadlineReminder(task: Task) {
+  if (!task.deadline) {
+    return null;
+  }
+
+  const deadline = new Date(task.deadline);
+
+  if (Number.isNaN(deadline.getTime())) {
+    return null;
+  }
+
+  if (deadline.getTime() <= Date.now()) {
+    return null;
+  }
+
+  const granted = await requestNotificationPermission();
+
+  if (!granted) {
+    return null;
+  }
+
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Deadline approaching",
+      body: `${task.goal} is approaching its deadline.`,
+      data: {
+        type: "deadline",
+        taskId: task.id,
+      },
+      sound: "default",
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: deadline,
+      channelId: TASK_NOTIFICATION_CHANNEL,
+    },
+  });
+}
+
+export async function sendTaskCompletedNotification(task: Task) {
+  return sendImmediateNotification(
+    "Task completed",
+    `You completed "${task.goal}".`,
+    {
+      type: "task-completed",
+      taskId: task.id,
+    },
+  );
+}
+
+export async function cancelScheduledNotification(notificationId?: string) {
+  if (!notificationId) {
+    return;
+  }
+
+  await Notifications.cancelScheduledNotificationAsync(notificationId);
+}
+
+export async function cancelAllTaskNotifications() {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
+
 export async function sendTestNotification() {
   return sendImmediateNotification(
     "Task Library",
@@ -106,12 +168,4 @@ export async function sendTestNotification() {
       type: "test",
     },
   );
-}
-
-export async function cancelScheduledNotification(notificationId: string) {
-  await Notifications.cancelScheduledNotificationAsync(notificationId);
-}
-
-export async function cancelAllTaskNotifications() {
-  await Notifications.cancelAllScheduledNotificationsAsync();
 }

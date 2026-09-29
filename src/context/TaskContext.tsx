@@ -9,7 +9,12 @@ import {
   type ReactNode,
 } from "react";
 
-import { scheduleTaskReminder } from "../services/notifications";
+import { createNotificationMessage } from "../services/notificationRules";
+import {
+  cancelScheduledNotification,
+  scheduleTaskReminder,
+  sendTaskCompletedNotification,
+} from "../services/notifications";
 
 import { normalizeTaskPlan } from "../services/taskPlanner";
 import { loadTasks, saveTasks } from "../services/taskRepository";
@@ -23,6 +28,7 @@ import type {
   TaskStage,
   TaskStatus,
 } from "../types/task";
+import { useNotifications } from "./NotificationContext";
 
 type TaskContextValue = {
   tasks: Task[];
@@ -93,6 +99,7 @@ function createManualPlan(task: Task, steps: ManualSubtaskInput[]): TaskPlan {
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { addNotification } = useNotifications();
 
   /*
    * This prevents persistence from writing the initial empty state
@@ -189,6 +196,13 @@ export function TaskProvider({ children }: TaskProviderProps) {
   }, []);
 
   const deleteTask = useCallback((taskId: string) => {
+    const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+    if (!currentTask) {
+      return;
+    }
+
+    void cancelScheduledNotification(currentTask.scheduledNotificationId);
     setTasks((currentTasks) =>
       currentTasks.filter((task) => task.id !== taskId),
     );
@@ -230,31 +244,56 @@ export function TaskProvider({ children }: TaskProviderProps) {
     );
   }, []);
 
-  const scheduleTask = useCallback((taskId: string, scheduledAt: string) => {
-    setTasks((currentTasks) =>
-      updateTaskById(currentTasks, taskId, (task) => ({
-        ...task,
+  const scheduleTask = useCallback(
+    (taskId: string, scheduledAt: string) => {
+      const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+      if (!currentTask) {
+        return;
+      }
+
+      void cancelScheduledNotification(currentTask.scheduledNotificationId);
+
+      const updatedTask: Task = {
+        ...currentTask,
         scheduledAt,
         stage: "scheduled",
         status: "upcoming",
-      })),
-    );
+        scheduledNotificationId: undefined,
+      };
 
-    const task = tasksRef.current.find((item) => item.id === taskId);
+      setTasks((currentTasks) =>
+        updateTaskById(currentTasks, taskId, () => updatedTask),
+      );
 
-    if (!task) {
-      return;
-    }
+      void (async () => {
+        const notificationId = await scheduleTaskReminder(updatedTask);
 
-    const updatedTask: Task = {
-      ...task,
-      scheduledAt,
-      stage: "scheduled",
-      status: "upcoming",
-    };
+        if (notificationId) {
+          setTasks((currentTasks) =>
+            updateTaskById(currentTasks, taskId, (task) => ({
+              ...task,
+              scheduledNotificationId: notificationId,
+            })),
+          );
+        }
 
-    void scheduleTaskReminder(updatedTask);
-  }, []);
+        const notificationMessage = createNotificationMessage({
+          type: "task-scheduled",
+          task: updatedTask,
+        });
+
+        if (notificationMessage) {
+          addNotification({
+            ...notificationMessage,
+            taskId,
+            read: false,
+          });
+        }
+      })();
+    },
+    [addNotification],
+  );
 
   const startTask = useCallback((taskId: string) => {
     const startedAt = new Date().toISOString();
@@ -297,55 +336,90 @@ export function TaskProvider({ children }: TaskProviderProps) {
     [],
   );
 
-  const completeSubtask = useCallback((taskId: string, subtaskId: string) => {
-    const completedAt = new Date().toISOString();
+  const finishTask = useCallback(
+    (task: Task) => {
+      void cancelScheduledNotification(task.scheduledNotificationId);
 
-    setTasks((currentTasks) =>
-      updateTaskById(currentTasks, taskId, (task) => {
-        if (!task.plan || task.status === "completed") {
-          return task;
-        }
-
-        const subtasks = task.plan.subtasks.map((subtask) =>
-          subtask.id === subtaskId
-            ? {
-                ...subtask,
-                status: "completed" as const,
-                completedAt,
-              }
-            : subtask,
-        );
-
-        const allCompleted =
-          subtasks.length > 0 &&
-          subtasks.every((subtask) => subtask.status === "completed");
-
-        return {
-          ...task,
-          status: allCompleted ? "completed" : "in-progress",
-          stage: allCompleted ? "completed" : "active",
-          completedAt: allCompleted ? completedAt : task.completedAt,
-          plan: {
-            ...task.plan,
-            subtasks,
-          },
-        };
-      }),
-    );
-  }, []);
-
-  const completeTask = useCallback((taskId: string) => {
-    const completedAt = new Date().toISOString();
-
-    setTasks((currentTasks) =>
-      updateTaskById(currentTasks, taskId, (task) => ({
+      const completedTask: Task = {
         ...task,
         status: "completed",
         stage: "completed",
-        completedAt,
-      })),
-    );
-  }, []);
+        completedAt: new Date().toISOString(),
+        scheduledNotificationId: undefined,
+      };
+
+      setTasks((currentTasks) =>
+        updateTaskById(currentTasks, task.id, () => completedTask),
+      );
+
+      const notificationMessage = createNotificationMessage({
+        type: "task-completed",
+        task: completedTask,
+      });
+
+      if (notificationMessage) {
+        addNotification({
+          ...notificationMessage,
+          taskId: task.id,
+          read: false,
+        });
+      }
+
+      void sendTaskCompletedNotification(completedTask);
+    },
+    [addNotification],
+  );
+
+  const completeSubtask = useCallback(
+    (taskId: string, subtaskId: string) => {
+      const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+      if (!currentTask?.plan || currentTask.status === "completed") {
+        return;
+      }
+
+      const completedAt = new Date().toISOString();
+      const subtasks = currentTask.plan.subtasks.map((subtask) =>
+        subtask.id === subtaskId
+          ? { ...subtask, status: "completed" as const, completedAt }
+          : subtask,
+      );
+      const updatedTask: Task = {
+        ...currentTask,
+        plan: { ...currentTask.plan, subtasks },
+      };
+      const allCompleted =
+        subtasks.length > 0 &&
+        subtasks.every((subtask) => subtask.status === "completed");
+
+      if (allCompleted) {
+        finishTask(updatedTask);
+        return;
+      }
+
+      setTasks((currentTasks) =>
+        updateTaskById(currentTasks, taskId, () => ({
+          ...updatedTask,
+          status: "in-progress",
+          stage: "active",
+        })),
+      );
+    },
+    [finishTask],
+  );
+
+  const completeTask = useCallback(
+    (taskId: string) => {
+      const currentTask = tasksRef.current.find((task) => task.id === taskId);
+
+      if (!currentTask) {
+        return;
+      }
+
+      finishTask(currentTask);
+    },
+    [finishTask],
+  );
 
   const value = useMemo<TaskContextValue>(
     () => ({

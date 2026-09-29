@@ -62,6 +62,8 @@ export type Task = TaskInput & {
   plan?: TaskPlan;
 
   scheduledAt?: string;
+  scheduledNotificationId?: string;
+
   startedAt?: string;
   completedAt?: string;
 };
