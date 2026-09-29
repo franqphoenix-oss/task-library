@@ -24,6 +24,30 @@ export function startOfDay(date: Date) {
   return result;
 }
 
+export function getWeekDates(date: Date) {
+  const currentDate = startOfDay(date);
+  const mondayOffset = (currentDate.getDay() + 6) % 7;
+
+  const monday = new Date(currentDate);
+  monday.setDate(currentDate.getDate() - mondayOffset);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const weekDate = new Date(monday);
+    weekDate.setDate(monday.getDate() + index);
+
+    return weekDate;
+  });
+}
+
+export function formatHomeDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function isSameDay(first: Date, second: Date) {
   return (
     first.getFullYear() === second.getFullYear() &&

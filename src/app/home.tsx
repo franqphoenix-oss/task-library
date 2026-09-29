@@ -1,3 +1,9 @@
+import {
+  formatHomeDate,
+  getWeekDates,
+  isSameDay,
+  startOfDay,
+} from "@/services/scheduling";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
@@ -20,16 +26,6 @@ import { useTasks } from "../context/TaskContext";
 import { useTheme } from "../context/ThemeContext";
 
 import { createHomeStyles } from "@/features/home/home.styles";
-
-const dates = [
-  { day: "Mon", date: "21" },
-  { day: "Tue", date: "22" },
-  { day: "Wed", date: "23" },
-  { day: "Thu", date: "24" },
-  { day: "Fri", date: "25" },
-  { day: "Sat", date: "26" },
-  { day: "Sun", date: "27" },
-];
 
 function formatDeadline(deadline: string) {
   const date = new Date(deadline);
@@ -73,7 +69,11 @@ export default function HomeScreen() {
   const { tasks } = useTasks();
   const { width: screenWidth } = useWindowDimensions();
 
-  const [selectedDate, setSelectedDate] = useState("24");
+  const today = useMemo(() => startOfDay(new Date()), []);
+
+  const weekDates = useMemo(() => getWeekDates(today), [today]);
+
+  const [selectedDate, setSelectedDate] = useState(today);
 
   const horizontalPadding = 32;
   const dateGap = 6;
@@ -118,7 +118,7 @@ export default function HomeScreen() {
             <View>
               <Text style={homeStyles.greeting}>Good morning, Alex 👋</Text>
 
-              <Text style={homeStyles.dateText}>Thu, 24 Apr 2025</Text>
+              <Text style={homeStyles.dateText}>{formatHomeDate(today)}</Text>
             </View>
 
             <View style={homeStyles.headerActions}>
@@ -154,12 +154,12 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={homeStyles.dateRow}
           >
-            {dates.map((item) => {
-              const active = item.date === selectedDate;
+            {weekDates.map((date) => {
+              const active = isSameDay(date, selectedDate);
 
               return (
                 <Pressable
-                  key={item.date}
+                  key={date.toISOString()}
                   style={[
                     homeStyles.dateItem,
                     {
@@ -167,7 +167,14 @@ export default function HomeScreen() {
                     },
                     active && homeStyles.dateItemActive,
                   ]}
-                  onPress={() => setSelectedDate(item.date)}
+                  onPress={() => setSelectedDate(date)}
+                  accessibilityRole="button"
+                  accessibilityLabel={date.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
                 >
                   <Text
                     style={[
@@ -175,7 +182,9 @@ export default function HomeScreen() {
                       active && homeStyles.activeDateText,
                     ]}
                   >
-                    {item.day}
+                    {date.toLocaleDateString("en-US", {
+                      weekday: "short",
+                    })}
                   </Text>
 
                   <Text
@@ -184,7 +193,7 @@ export default function HomeScreen() {
                       active && homeStyles.activeDateText,
                     ]}
                   >
-                    {item.date}
+                    {date.getDate()}
                   </Text>
                 </Pressable>
               );
