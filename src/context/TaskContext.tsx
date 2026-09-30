@@ -116,10 +116,68 @@ export function TaskProvider({ children }: TaskProviderProps) {
    * Rendered screens should read `tasks` directly.
    */
   const tasksRef = useRef(tasks);
+  const notificationOperationIdsRef = useRef(new Map<string, number>());
 
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!notificationsEnabled) {
+      for (const task of tasksRef.current) {
+        notificationOperationIdsRef.current.set(
+          task.id,
+          (notificationOperationIdsRef.current.get(task.id) ?? 0) + 1,
+        );
+      }
+
+      queueMicrotask(() => {
+        setTasks((currentTasks) =>
+          currentTasks.map((task) => ({
+            ...task,
+            scheduledNotificationId: undefined,
+            deadlineNotificationId: undefined,
+          })),
+        );
+      });
+
+      return;
+    }
+
+    for (const task of tasksRef.current) {
+      if (!task.scheduledAt) {
+        continue;
+      }
+
+      const operationId =
+        (notificationOperationIdsRef.current.get(task.id) ?? 0) + 1;
+
+      notificationOperationIdsRef.current.set(task.id, operationId);
+
+      void (async () => {
+        const [taskNotificationId, deadlineNotificationId] = await Promise.all([
+          scheduleTaskReminder(task),
+          scheduleDeadlineReminder(task),
+        ]);
+
+        if (notificationOperationIdsRef.current.get(task.id) !== operationId) {
+          return;
+        }
+
+        setTasks((currentTasks) =>
+          updateTaskById(currentTasks, task.id, (currentTask) => ({
+            ...currentTask,
+            scheduledNotificationId: taskNotificationId ?? undefined,
+            deadlineNotificationId: deadlineNotificationId ?? undefined,
+          })),
+        );
+      })();
+    }
+  }, [isLoading, notificationsEnabled]);
 
   /*
    * Hydrate the task state once when the provider mounts.
@@ -209,6 +267,11 @@ export function TaskProvider({ children }: TaskProviderProps) {
       return;
     }
 
+    notificationOperationIdsRef.current.set(
+      taskId,
+      (notificationOperationIdsRef.current.get(taskId) ?? 0) + 1,
+    );
+
     const remainingTasks = tasksRef.current.filter(
       (task) => task.id !== taskId,
     );
@@ -267,6 +330,11 @@ export function TaskProvider({ children }: TaskProviderProps) {
         return;
       }
 
+      const operationId =
+        (notificationOperationIdsRef.current.get(taskId) ?? 0) + 1;
+
+      notificationOperationIdsRef.current.set(taskId, operationId);
+
       void cancelScheduledNotification(currentTask.scheduledNotificationId);
 
       void cancelScheduledNotification(currentTask.deadlineNotificationId);
@@ -293,6 +361,10 @@ export function TaskProvider({ children }: TaskProviderProps) {
           scheduleTaskReminder(updatedTask),
           scheduleDeadlineReminder(updatedTask),
         ]);
+
+        if (notificationOperationIdsRef.current.get(taskId) !== operationId) {
+          return;
+        }
 
         setTasks((currentTasks) =>
           updateTaskById(currentTasks, taskId, (task) => ({
@@ -362,6 +434,11 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   const finishTask = useCallback(
     (task: Task) => {
+      notificationOperationIdsRef.current.set(
+        task.id,
+        (notificationOperationIdsRef.current.get(task.id) ?? 0) + 1,
+      );
+
       void cancelScheduledNotification(task.scheduledNotificationId);
       void cancelScheduledNotification(task.deadlineNotificationId);
 

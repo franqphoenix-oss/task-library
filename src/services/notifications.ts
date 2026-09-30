@@ -1,3 +1,4 @@
+import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import type { Task } from "../types/task";
@@ -6,10 +7,6 @@ import { configureNotificationHandler } from "./notificationHandler";
 export const TASK_NOTIFICATION_CHANNEL = "task-library-tasks";
 
 const DEADLINE_REMINDER_OFFSET_MS = 60 * 60 * 1000;
-
-type NotificationsModule = typeof import("expo-notifications");
-
-let notificationsModulePromise: Promise<NotificationsModule | null> | undefined;
 
 function warnNotificationFailure(operation: string, error: unknown) {
   if (__DEV__) {
@@ -22,17 +19,13 @@ export function getNotificationsModule() {
     return Promise.resolve(null);
   }
 
-  notificationsModulePromise ??= import("expo-notifications")
-    .then((notifications) => {
-      configureNotificationHandler(notifications);
-      return notifications;
-    })
-    .catch((error: unknown) => {
-      warnNotificationFailure("module loading", error);
-      return null;
-    });
-
-  return notificationsModulePromise;
+  try {
+    configureNotificationHandler(Notifications);
+    return Promise.resolve(Notifications);
+  } catch (error) {
+    warnNotificationFailure("module loading", error);
+    return Promise.resolve(null);
+  }
 }
 
 export async function configureNotifications() {

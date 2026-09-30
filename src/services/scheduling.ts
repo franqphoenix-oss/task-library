@@ -72,7 +72,7 @@ export function getMonthDays(month: Date) {
 
   const mondayFirstOffset = (firstDay.getDay() + 6) % 7;
 
-  const days: Array<Date | null> = Array.from(
+  const days: (Date | null)[] = Array.from(
     { length: mondayFirstOffset },
     () => null,
   );

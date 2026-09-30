@@ -1,4 +1,7 @@
-type NotificationsModule = typeof import("expo-notifications");
+type NotificationsModule = Pick<
+  typeof import("expo-notifications"),
+  "setNotificationHandler"
+>;
 
 export function configureNotificationHandler(
   Notifications: NotificationsModule,
