@@ -1,4 +1,3 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import type { Task } from "../types/task";
@@ -14,17 +13,18 @@ function warnNotificationFailure(operation: string, error: unknown) {
   }
 }
 
-export function getNotificationsModule() {
+export async function getNotificationsModule() {
   if (Platform.OS === "web") {
-    return Promise.resolve(null);
+    return null;
   }
 
   try {
+    const Notifications = await import("expo-notifications");
     configureNotificationHandler(Notifications);
-    return Promise.resolve(Notifications);
+    return Notifications;
   } catch (error) {
     warnNotificationFailure("module loading", error);
-    return Promise.resolve(null);
+    return null;
   }
 }
 
